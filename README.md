@@ -74,10 +74,10 @@ So we can say that our relation of this 2 models are one-to-many relation ship
 | ---------- | ------ | --- | ------------------ |
 | ID         | INT    | PK  | :heavy_check_mark: |
 | SupplierID | INT    | FK  | :heavy_check_mark: |
-| Name       | String |     | :heavy_check_mark: |
+| Name       | STRING |     | :heavy_check_mark: |
 | Quantity   | INT    |     | :heavy_check_mark: |
 | Price      | MONEY  |     | :heavy_check_mark: |
-| Categories | String |     | :heavy_check_mark: |
+| Categories | STRING |     | :heavy_check_mark: |
 
 :warning: **NOTE** : 
 
