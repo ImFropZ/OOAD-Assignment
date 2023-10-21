@@ -101,7 +101,7 @@ So we can say that our relation of this 2 models are one-to-many relation ship
 | GET    | /api/products      |            |               | Result<List<Product>>   |
 | GET    | /api/products/{id} | id: String |               | Result<Product?>        |
 | POST   | /api/products      |            | Product       | Result\<Product?>       |
-| PUT    | /api/products      |            | List<Product> | Result\<List\<Product>> |
+| PUT    | /api/products      |            | List/<Product> | Result\<List\<Product>> |
 | PATCH  | /api/products/{id} | id: String | Product       | Result\<Product?>       |
 | DELETE | /api/products/{id} | id: String |               | Result\<Bool>           |
 
@@ -112,6 +112,6 @@ So we can say that our relation of this 2 models are one-to-many relation ship
 | GET    | /api/suppilers      |            |                | Result<List<Supplier>>   |
 | GET    | /api/suppilers/{id} | id: String |                | Result<Supplier?>        |
 | POST   | /api/suppilers      |            | Supplier       | Result\<Supplier?>       |
-| PUT    | /api/suppilers      |            | List<Supplier> | Result\<List\<Supplier>> |
+| PUT    | /api/suppilers      |            | List/<Supplier> | Result\<List\<Supplier>> |
 | PATCH  | /api/suppilers/{id} | id: String | Supplier       | Result\<Supplier?>       |
 | DELETE | /api/suppilers/{id} | id: String |                | Result\<Bool>            |
