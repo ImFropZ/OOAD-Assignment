@@ -33,11 +33,23 @@ namespace server.Services
             return _connection.State;
         }
 
+        public NpgsqlConnection Connection
+        {
+            get { return _connection; }
+        }
+
         public NpgsqlDataReader ExecuteReader(string query)
         {
             NpgsqlCommand command = new(query, _connection);
 
             return command.ExecuteReader();
+        }
+
+        public Task<NpgsqlDataReader> ExecuteReaderAsync(string query)
+        {
+            NpgsqlCommand command = new(query, _connection);
+
+            return command.ExecuteReaderAsync();
         }
 
         public int ExecuteNonQuery(string query)
@@ -47,11 +59,25 @@ namespace server.Services
             return command.ExecuteNonQuery();
         }
 
+        public Task<int> ExecuteNonQueryAsync(string query)
+        {
+            NpgsqlCommand command = new(query, _connection);
+
+            return command.ExecuteNonQueryAsync();
+        }
+
         public object? ExecuteScalar(string query)
         {
             NpgsqlCommand command = new(query, _connection);
 
             return command.ExecuteScalar();
+        }
+
+        public Task<object?> ExecuteScalarAsync(string query)
+        {
+            NpgsqlCommand command = new(query, _connection);
+
+            return command.ExecuteScalarAsync();
         }
 
         public DataTable ExecuteQuery(string query)
