@@ -12,7 +12,7 @@ namespace server.Services
             _databaseService = databaseService;
         }
 
-        public async Task<List<Product>> Get()
+        public async Task<List<Product>> GetProducts()
         {
             List<Product> products = new();
 
@@ -42,7 +42,7 @@ namespace server.Services
             return products;
         }
 
-        public async Task<Product?> Get(int key)
+        public async Task<Product?> GetProductById(int key)
         {
             Product? product = null;
 
@@ -69,7 +69,7 @@ namespace server.Services
             return product;
         }
 
-        public async Task<Product?> Post(ProductCreated product)
+        public async Task<Product?> AddProduct(ProductCreated product)
         {
             _databaseService.Open();
 
@@ -102,7 +102,7 @@ namespace server.Services
             return createdProduct;
         }
 
-        public async Task<List<Product>> Put(List<ProductUpdated> products)
+        public async Task<List<Product>> UpdateProducts(List<ProductUpdated> products)
         {
             var updatedProducts = new List<Product>();
             _databaseService.Open();
@@ -156,7 +156,7 @@ namespace server.Services
             return updatedProducts;
         }
 
-        public async Task<Product?> Patch(int key, ProductUpdated product)
+        public async Task<Product?> UpdateProductById(int key, ProductUpdated product)
         {
             _databaseService.Open();
 
@@ -207,7 +207,7 @@ namespace server.Services
             return updatedProduct;
         }
 
-        public Task<bool> Delete(int key)
+        public Task<bool> DeleteProduct(int key)
         {
             _databaseService.Open();
 
