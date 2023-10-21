@@ -20,42 +20,50 @@ namespace server.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<Result<IEnumerable<Product>>> GetProducts()
         {
-            // Wait get method to finish before returning
-            return Ok(_productService.Get().Result);
+            _logger.LogInformation("GET: Products");
+            return Ok(new Result<IEnumerable<Product>>(_productService.Get().Result));
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Product?> Get(int id)
+        public ActionResult<Result<Product?>> GetProductById(int id)
         {
-            return Ok(_productService.Get(id).Result);
+            _logger.LogInformation($"GET: Product by id = {id}");
+            return Ok(new Result<Product?>(_productService.Get(id).Result));
         }
 
         [HttpPost]
-        public ActionResult<ProductCreated?> Post([FromBody] ProductCreated product)
+        public ActionResult<Result<Product?>> CreateProduct([FromBody] ProductCreated product)
         {
-            return Ok(_productService.Post(product).Result);
+            _logger.LogInformation("CREATE: Product");
+            return Ok(new Result<Product?>(_productService.Post(product).Result));
         }
 
         [HttpPut]
-        public ActionResult<IEnumerable<ProductUpdated>> Put(
+        public ActionResult<Result<IEnumerable<Product>>> UpdateProducts(
             [FromBody] List<ProductUpdated> products
         )
         {
-            return Ok(_productService.Put(products).Result);
+            _logger.LogInformation("UPDATE: Products");
+            return Ok(new Result<IEnumerable<Product>>(_productService.Put(products).Result));
         }
 
         [HttpPatch("{id}")]
-        public ActionResult<Product?> Patch(int id, [FromBody] ProductUpdated product)
+        public ActionResult<Result<Product?>> UpdateProductById(
+            int id,
+            [FromBody] ProductUpdated product
+        )
         {
-            return Ok(_productService.Patch(id, product).Result);
+            _logger.LogInformation($"UPDATE: Product by ID = {id}");
+            return Ok(new Result<Product?>(_productService.Patch(id, product).Result));
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<bool> Delete(int id)
+        public ActionResult<Result<bool>> DeleteProductById(int id)
         {
-            return Ok(_productService.Delete(id).Result);
+            _logger.LogInformation($"DELETE: Product by ID = {id}");
+            return Ok(new Result<bool>(_productService.Delete(id).Result));
         }
     }
 }

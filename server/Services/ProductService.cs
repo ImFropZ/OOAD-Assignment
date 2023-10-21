@@ -24,15 +24,15 @@ namespace server.Services
 
             while (await reader.ReadAsync())
             {
-                Product product = new Product()
-                {
-                    ID = reader.GetInt32(0),
-                    SupplierID = reader.GetInt32(1),
-                    Name = reader.GetString(2),
-                    Quantity = reader.GetInt32(3),
-                    Price = reader.GetDecimal(4),
-                    Categories = reader.GetString(5)
-                };
+                Product product =
+                    new(
+                        reader.GetInt32(0),
+                        reader.GetInt32(1),
+                        reader.GetString(2),
+                        reader.GetInt32(3),
+                        reader.GetDecimal(4),
+                        reader.GetString(5)
+                    );
 
                 products.Add(product);
             }
@@ -54,15 +54,14 @@ namespace server.Services
 
             if (reader.Read())
             {
-                product = new()
-                {
-                    ID = reader.GetInt32(0),
-                    SupplierID = reader.GetInt32(1),
-                    Name = reader.GetString(2),
-                    Quantity = reader.GetInt32(3),
-                    Price = reader.GetDecimal(4),
-                    Categories = reader.GetString(5)
-                };
+                product = new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
             }
 
             _databaseService.Close();
@@ -70,7 +69,7 @@ namespace server.Services
             return product;
         }
 
-        public async Task<ProductCreated?> Post(ProductCreated product)
+        public async Task<Product?> Post(ProductCreated product)
         {
             _databaseService.Open();
 
@@ -78,13 +77,34 @@ namespace server.Services
                 $"INSERT INTO products (supplier_id, name, quantity, price, categories) VALUES ({product.SupplierID}, '{product.Name}', {product.Quantity}, {product.Price}, '{product.Categories}')"
             );
 
+            var reader = await _databaseService.ExecuteReaderAsync(
+                $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = (SELECT MAX(id) FROM products)"
+            );
+
+            if (!reader.Read())
+            {
+                _databaseService.Close();
+                return null;
+            }
+
+            Product createdProduct =
+                new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
+
             _databaseService.Close();
 
-            return product;
+            return createdProduct;
         }
 
-        public async Task<List<ProductUpdated>> Put(List<ProductUpdated> products)
+        public async Task<List<Product>> Put(List<ProductUpdated> products)
         {
+            var updatedProducts = new List<Product>();
             _databaseService.Open();
 
             foreach (var product in products)
@@ -110,14 +130,33 @@ namespace server.Services
                 updatedProductQuery += $" WHERE id = {product.ID}";
 
                 await _databaseService.ExecuteNonQueryAsync(updatedProductQuery);
+
+                var reader = await _databaseService.ExecuteReaderAsync(
+                    $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {product.ID}"
+                );
+
+                if (!reader.Read())
+                    continue;
+
+                Product updatedProduct =
+                    new(
+                        reader.GetInt32(0),
+                        reader.GetInt32(1),
+                        reader.GetString(2),
+                        reader.GetInt32(3),
+                        reader.GetDecimal(4),
+                        reader.GetString(5)
+                    );
+
+                updatedProducts.Add(updatedProduct);
             }
 
             _databaseService.Close();
 
-            return products;
+            return updatedProducts;
         }
 
-        public async Task<ProductUpdated?> Patch(int key, ProductUpdated product)
+        public async Task<Product?> Patch(int key, ProductUpdated product)
         {
             _databaseService.Open();
 
@@ -143,9 +182,29 @@ namespace server.Services
 
             await _databaseService.ExecuteNonQueryAsync(updatedProductQuery);
 
+            var reader = await _databaseService.ExecuteReaderAsync(
+                $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {key}"
+            );
+
+            if (!reader.Read())
+            {
+                _databaseService.Close();
+                return null;
+            }
+
+            Product updatedProduct =
+                new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
+
             _databaseService.Close();
 
-            return product;
+            return updatedProduct;
         }
 
         public Task<bool> Delete(int key)
