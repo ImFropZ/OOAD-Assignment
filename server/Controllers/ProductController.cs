@@ -10,12 +10,10 @@ namespace server.Controllers
     {
         private readonly ProductService _productService;
         private readonly ILogger<ProductController> _logger;
-        private readonly DatabaseService _databaseSerivce;
 
         public ProductController(ILogger<ProductController> logger, DatabaseService databaseService)
         {
             _logger = logger;
-            _databaseSerivce = databaseService;
             _productService = new ProductService(databaseService);
         }
 

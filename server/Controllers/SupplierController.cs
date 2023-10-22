@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
-using server.Models.Responses;
 using server.Services;
-using server.Utils;
 
 namespace server.Controllers
 {
@@ -10,123 +8,51 @@ namespace server.Controllers
     [Route("api/suppliers")]
     public class SupplierController : Controller
     {
-        private SupplierService supplierService;
+        private readonly SupplierService _supplierService;
 
-        public SupplierController(SupplierService supplierService)
+        public SupplierController(DatabaseService _databaseService)
         {
-            this.supplierService = supplierService;
+            _supplierService = new SupplierService(_databaseService);
         }
 
-        // GET: SupplierController
         [HttpGet]
-        public ActionResult<SupplierResponse> GetSuppliers()
+        public ActionResult<Result<IEnumerable<Supplier>>> GetSuppliers()
         {
-            List<Supplier> suppliers = supplierService.GetSuppliers();
-
-            SupplierResponse response = new SupplierResponse("0001", "fail", "failed to fetch suppliers", suppliers);
-
-            if (suppliers.Count <= 0)
-            {
-                return BadRequest(response);
-            }
-
-            response = new SupplierResponse("0000", "success", "successfully fetching supplier", suppliers);
-
-            return Ok(response);
+            return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers().Result));
         }
 
-        // GET: By ID
         [HttpGet("{id}")]
-        public ActionResult<SupplierResponse> GetSupplierById(int id)
+        public ActionResult<Result<Supplier?>> GetSupplierById(int id)
         {
-            // Get data from suplliers array
-            Supplier supplier = supplierService.GetSupplier(id);
-
-            if (supplier == null)
-            {
-                SupplierResponse errorResponse = new SupplierResponse("0001", "fail", "supplier: " + id + " not found", null);
-                return NotFound(errorResponse);
-            }
-
-            List<Supplier> foundSupplier = new List<Supplier> { supplier };
-            SupplierResponse response = new SupplierResponse("0000", "success", "successfully fetching supplier", foundSupplier);
-
-            return Ok(response);
+            return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id).Result));
         }
 
-        // Create
         [HttpPost]
-        public ActionResult<Response> CreateSupplier(Supplier payload)
+        public ActionResult<Result<Supplier?>> CreateSupplier(SupplierCreated payload)
         {
-            string validationMessage = new PayloadValidator().ValidateSupplier(payload);
-            Response response;
-
-            if (validationMessage != "")
-            {
-                response = new Response("0001", "fail", validationMessage);
-                return BadRequest(response);
-            }
-
-            supplierService.AddSupplier(payload);
-
-            response = new Response("0000", "success", "successfully created");
-            return Ok(response);
+            return Ok(new Result<Supplier?>(_supplierService.AddSupplier(payload).Result));
         }
 
-        // Delete
-        [HttpDelete("{id}")]
-        public ActionResult<Response> DeleteSupplierById(int id)
+        [HttpPut]
+        public ActionResult<Result<IEnumerable<Supplier>>> UpdateSupplierById(
+            [FromBody] List<SupplierUpdated> suppliers
+        )
         {
-            // Get data from suplliers array
-            Supplier supplier = supplierService.GetSupplier(id);
-            Response response;
-
-            if (supplier == null)
-            {
-                response = new Response("0001", "fail", "supplier: " + id + " not found");
-                return NotFound(response);
-            }
-
-            Boolean isSupplierRemoved = supplierService.DeleteSupplier(supplier);
-
-            if (isSupplierRemoved)
-            {
-                response = new Response("0000", "success", "successfully deleted supplier");
-            }
-            else
-            {
-                response = new Response("0001", "fail", "failed to delete supplier");
-            }
-
-            return Ok(response);
+            return Ok(
+                new Result<List<Supplier>>(_supplierService.UpdateSuppliers(suppliers).Result)
+            );
         }
 
-        // Edit One Supplier
         [HttpPatch("{id}")]
-        public ActionResult<Response> EditSupplierById(int id, Supplier payload)
+        public ActionResult<Result<Supplier?>> UpdateSupplierById(int id, SupplierUpdated payload)
         {
-            string validationMessage = new PayloadValidator().ValidateSupplier(payload);
-            Response response;
-
-            if (validationMessage != "")
-            {
-                response = new Response("0001", "fail", validationMessage);
-                return BadRequest(response);
-            }
-
-            Supplier supplier = supplierService.GetSupplier(id);
-
-            if (supplier == null)
-            {
-                response = new Response("0001", "fail", "supplier: " + id + " not found");
-                return NotFound(response);
-            }
-
-            supplierService.ModifySupplier(id, payload);
-
-            response = new Response("0000", "success", "successfully modified");
-            return Ok(response);
+            return Ok(new Result<Supplier?>(_supplierService.UpdateSupplier(id, payload).Result));
         }
 
+        [HttpDelete("{id}")]
+        public ActionResult<Result<bool>> DeleteSupplierById(int id)
+        {
+            return Ok(new Result<bool>(_supplierService.DeleteSupplier(id).Result));
+        }
     }
 }
