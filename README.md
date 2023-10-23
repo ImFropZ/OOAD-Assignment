@@ -46,7 +46,7 @@
     - User Interface:
       If time permits, create a simple web interface to interact with the inventory system visually.
 
-  -  Additional Features (Optional, for Advanced Projects):
+  - Additional Features (Optional, for Advanced Projects):
 
     - Search and Filters:
       Allow users to search for items and filter items based on various criteria.
