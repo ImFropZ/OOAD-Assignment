@@ -18,48 +18,48 @@
 
 - Requirement
 
-* Functional Requirements:
+  - Functional Requirements:
 
-  - CRUD Operations:
-    Create, read, update, and delete operations for inventory items.
-  - Item Information:
-    Store item details such as ID, name, description, quantity, price, and category.
-  - Supplier Information:
-    Maintain supplier details including name, contact information, etc.
-  - API Endpoints:
-    Implement API endpoints for each CRUD operation.
-  - CLI Commands:
-    Implement commands for listing items, adding items, updating item details, and deleting items.
-  - Validation:
-    Validate input data to ensure it meets the required criteria (e.g., non-negative quantity, valid price).
-  - Error Handling:
-    Handle errors gracefully, providing meaningful error messages to users.
+    - CRUD Operations:
+      Create, read, update, and delete operations for inventory items.
+    - Item Information:
+      Store item details such as ID, name, description, quantity, price, and category.
+    - Supplier Information:
+      Maintain supplier details including name, contact information, etc.
+    - API Endpoints:
+      Implement API endpoints for each CRUD operation.
+    - CLI Commands:
+      Implement commands for listing items, adding items, updating item details, and deleting items.
+    - Validation:
+      Validate input data to ensure it meets the required criteria (e.g., non-negative quantity, valid price).
+    - Error Handling:
+      Handle errors gracefully, providing meaningful error messages to users.
 
-* Non-Functional Requirements:
+  - Non-Functional Requirements:
 
-  - Data Integrity:
-    Ensure data integrity by handling concurrent requests and avoiding data inconsistencies.
-  - Scalability:
-    Design the system in a way that allows it to scale if the inventory grows significantly.
-  - Documentation:
-    Provide clear and comprehensive documentation for your API and CLI commands.
-  - User Interface:
-    If time permits, create a simple web interface to interact with the inventory system visually.
+    - Data Integrity:
+      Ensure data integrity by handling concurrent requests and avoiding data inconsistencies.
+    - Scalability:
+      Design the system in a way that allows it to scale if the inventory grows significantly.
+    - Documentation:
+      Provide clear and comprehensive documentation for your API and CLI commands.
+    - User Interface:
+      If time permits, create a simple web interface to interact with the inventory system visually.
 
-* Additional Features (Optional, for Advanced Projects):
+  -  Additional Features (Optional, for Advanced Projects):
 
-  - Search and Filters:
-    Allow users to search for items and filter items based on various criteria.
-  - Transaction History:
-    Maintain a record of item transactions (sales, restocking) for auditing purposes.
-  - Notifications:
-    Implement notifications for low stock items or other relevant events.
-  - Reports:
-    Generate reports, such as sales reports or inventory valuation reports.
-  - User Roles and Permissions:
-    Implement user roles (admin, regular user) and permissions to restrict certain actions.
-  - Analytics:
-    Integrate analytics to gain insights into inventory trends and patterns.
+    - Search and Filters:
+      Allow users to search for items and filter items based on various criteria.
+    - Transaction History:
+      Maintain a record of item transactions (sales, restocking) for auditing purposes.
+    - Notifications:
+      Implement notifications for low stock items or other relevant events.
+    - Reports:
+      Generate reports, such as sales reports or inventory valuation reports.
+    - User Roles and Permissions:
+      Implement user roles (admin, regular user) and permissions to restrict certain actions.
+    - Analytics:
+      Integrate analytics to gain insights into inventory trends and patterns.
 
 ## Model
 
