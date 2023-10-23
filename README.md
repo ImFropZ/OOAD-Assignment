@@ -92,26 +92,34 @@ So we can say that our relation of this 2 models are one-to-many relation ship
 | Name                | STRING |     | :heavy_check_mark: |
 | Contact Information | STRING |     | :heavy_check_mark: |
 
+### Result
+
+| Field   | Type          |
+| ------- | ------------- |
+| Success | bool          |
+| Message | String        |
+| Data    | (GenericType) |
+
 ## API - ENDPOINT
 
 ### PRODUCT
 
-| METHOD | ENDPOINT           | Params     | Body          | Response                |
-| ------ | ------------------ | ---------- | ------------- | ----------------------- |
-| GET    | /api/products      |            |               | Result<List<Product>>   |
-| GET    | /api/products/{id} | id: String |               | Result<Product?>        |
-| POST   | /api/products      |            | Product       | Result\<Product?>       |
+| METHOD | ENDPOINT           | Params     | Body           | Response                |
+| ------ | ------------------ | ---------- | -------------- | ----------------------- |
+| GET    | /api/products      |            |                | Result\<List\<Product>> |
+| GET    | /api/products/{id} | id: String |                | Result<Product?>        |
+| POST   | /api/products      |            | Product        | Result\<Product?>       |
 | PUT    | /api/products      |            | List\<Product> | Result\<List\<Product>> |
-| PATCH  | /api/products/{id} | id: String | Product       | Result\<Product?>       |
-| DELETE | /api/products/{id} | id: String |               | Result\<Bool>           |
+| PATCH  | /api/products/{id} | id: String | Product        | Result\<Product?>       |
+| DELETE | /api/products/{id} | id: String |                | Result\<bool>           |
 
 ### SUPPILER
 
-| METHOD | ENDPOINT            | Params     | Body           | Response                 |
-| ------ | ------------------- | ---------- | -------------- | ------------------------ |
-| GET    | /api/suppilers      |            |                | Result<List<Supplier>>   |
-| GET    | /api/suppilers/{id} | id: String |                | Result<Supplier?>        |
-| POST   | /api/suppilers      |            | Supplier       | Result\<Supplier?>       |
+| METHOD | ENDPOINT            | Params     | Body            | Response                 |
+| ------ | ------------------- | ---------- | --------------- | ------------------------ |
+| GET    | /api/suppilers      |            |                 | Result\<List\<Supplier>> |
+| GET    | /api/suppilers/{id} | id: String |                 | Result<Supplier?>        |
+| POST   | /api/suppilers      |            | Supplier        | Result\<Supplier?>       |
 | PUT    | /api/suppilers      |            | List\<Supplier> | Result\<List\<Supplier>> |
-| PATCH  | /api/suppilers/{id} | id: String | Supplier       | Result\<Supplier?>       |
-| DELETE | /api/suppilers/{id} | id: String |                | Result\<Bool>            |
+| PATCH  | /api/suppilers/{id} | id: String | Supplier        | Result\<Supplier?>       |
+| DELETE | /api/suppilers/{id} | id: String |                 | Result\<bool>            |
