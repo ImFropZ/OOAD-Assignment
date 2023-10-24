@@ -28,6 +28,11 @@ namespace server.Services
             }
         }
 
+        public bool IsOpen()
+        {
+            return _connection.State == ConnectionState.Open;
+        }
+
         public ConnectionState State()
         {
             return _connection.State;

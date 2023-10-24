@@ -14,11 +14,12 @@ namespace server.Services
 
         public async Task<List<Supplier>> GetSuppliers()
         {
-            _databaseService.Open();
-
             List<Supplier> suppliers = new();
+
             try
             {
+                _databaseService.Open();
+
                 NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
                     "SELECT id, name, contact_information FROM suppliers"
                 );
@@ -35,7 +36,8 @@ namespace server.Services
             }
             catch (Exception)
             {
-                _databaseService.Close();
+                if (_databaseService.IsOpen())
+                    _databaseService.Close();
             }
 
             return suppliers;
@@ -43,10 +45,10 @@ namespace server.Services
 
         public async Task<Supplier?> GetSupplier(int id)
         {
-            _databaseService.Open();
-
             try
             {
+                _databaseService.Open();
+
                 NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
                     $"SELECT id, name, contact_information FROM suppliers WHERE id = {id}"
                 );
@@ -58,21 +60,23 @@ namespace server.Services
                     _databaseService.Close();
                     return supplier;
                 }
+
+                _databaseService.Close();
             }
             catch (Exception)
             {
-                _databaseService.Close();
+                if (_databaseService.IsOpen())
+                    _databaseService.Close();
             }
-            _databaseService.Close();
             return null;
         }
 
         public async Task<Supplier?> AddSupplier(SupplierCreated supplier)
         {
-            _databaseService.Open();
 
             try
             {
+                _databaseService.Open();
                 await _databaseService.ExecuteNonQueryAsync(
                     $"INSERT INTO suppliers (name, contact_information) VALUES ('{supplier.Name}', '{supplier.ContactInformation}') RETURNING id, name, contact_information"
                 );
@@ -88,10 +92,12 @@ namespace server.Services
                     _databaseService.Close();
                     return createdSupplier;
                 }
+                _databaseService.Close();
             }
             catch (Exception)
             {
-                _databaseService.Close();
+                if (_databaseService.IsOpen())
+                    _databaseService.Close();
             }
 
             return null;
@@ -99,10 +105,9 @@ namespace server.Services
 
         public async Task<Supplier?> UpdateSupplier(int id, SupplierUpdated supplier)
         {
-            _databaseService.Open();
-
             try
             {
+                _databaseService.Open();
                 String updateQuery = "UPDATE suppliers SET ";
                 if (supplier.Name == null && supplier.ContactInformation == null)
                 {
@@ -130,10 +135,13 @@ namespace server.Services
                     _databaseService.Close();
                     return updatedSupplier;
                 }
+
+                _databaseService.Close();
             }
             catch (Exception)
             {
-                _databaseService.Close();
+                if (_databaseService.IsOpen())
+                    _databaseService.Close();
             }
 
             return null;
@@ -158,10 +166,9 @@ namespace server.Services
 
         public async Task<bool> DeleteSupplier(int id)
         {
-            _databaseService.Open();
-
             try
             {
+                _databaseService.Open();
                 await _databaseService.ExecuteNonQueryAsync(
                     $"DELETE FROM suppliers WHERE id = {id}"
                 );
@@ -170,9 +177,9 @@ namespace server.Services
             }
             catch (Exception)
             {
-                _databaseService.Close();
+                if (_databaseService.IsOpen())
+                    _databaseService.Close();
             }
-
             return false;
         }
     }
