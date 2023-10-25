@@ -17,6 +17,7 @@ namespace server.Middlewares
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync(e.Message);
             }

@@ -30,7 +30,6 @@ internal class Program
         }
 
         app.UseMiddleware<GlobalErrorHandlerMiddleware>();
-        app.UseMiddleware<ValidationMiddleware>();
 
         app.UseHttpsRedirection();
 
