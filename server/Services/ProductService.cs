@@ -16,96 +16,13 @@ namespace server.Services
         {
             List<Product> products = new();
 
-            try
+            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                "SELECT id, supplier_id, name, quantity, price, categories FROM products"
+            );
+
+            while (await reader.ReadAsync())
             {
-                _databaseService.Open();
-
-                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                    "SELECT id, supplier_id, name, quantity, price, categories FROM products"
-                );
-
-                while (await reader.ReadAsync())
-                {
-                    Product product =
-                        new(
-                            reader.GetInt32(0),
-                            reader.GetInt32(1),
-                            reader.GetString(2),
-                            reader.GetInt32(3),
-                            reader.GetDecimal(4),
-                            reader.GetString(5)
-                        );
-
-                    products.Add(product);
-                }
-
-                _databaseService.Close();
-            }
-            catch (Exception)
-            {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
-            }
-
-            return products;
-        }
-
-        public async Task<Product?> GetProductById(int key)
-        {
-            Product? product = null;
-            try
-            {
-                _databaseService.Open();
-
-                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                    $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {key}"
-                );
-
-                if (reader.Read())
-                {
-                    product = new(
-                        reader.GetInt32(0),
-                        reader.GetInt32(1),
-                        reader.GetString(2),
-                        reader.GetInt32(3),
-                        reader.GetDecimal(4),
-                        reader.GetString(5)
-                    );
-                }
-
-                _databaseService.Close();
-            }
-            catch (Exception)
-            {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
-            }
-
-            return product;
-        }
-
-        public async Task<Product?> AddProduct(ProductCreated product)
-        {
-            Product createdProduct;
-            try
-            {
-                _databaseService.Open();
-
-                await _databaseService.ExecuteNonQueryAsync(
-                    $"INSERT INTO products (supplier_id, name, quantity, price, categories) VALUES ({product.SupplierID}, '{product.Name}', {product.Quantity}, {product.Price}, '{product.Categories}')"
-                );
-
-                var reader = await _databaseService.ExecuteReaderAsync(
-                    $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = (SELECT MAX(id) FROM products)"
-                );
-
-                if (!reader.Read())
-                {
-                    _databaseService.Close();
-                    return null;
-                }
-
-                createdProduct =
+                Product product =
                     new(
                         reader.GetInt32(0),
                         reader.GetInt32(1),
@@ -115,14 +32,59 @@ namespace server.Services
                         reader.GetString(5)
                     );
 
-                _databaseService.Close();
+                products.Add(product);
             }
-            catch (Exception)
+
+            return products;
+        }
+
+        public async Task<Product?> GetProductById(int key)
+        {
+            Product? product = null;
+
+            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {key}"
+            );
+
+            if (reader.Read())
             {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
-                return null;
+                product = new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
             }
+
+            return product;
+        }
+
+        public async Task<Product?> AddProduct(ProductCreated product)
+        {
+            Product createdProduct;
+
+            await _databaseService.ExecuteNonQueryAsync(
+                $"INSERT INTO products (supplier_id, name, quantity, price, categories) VALUES ({product.SupplierID}, '{product.Name}', {product.Quantity}, {product.Price}, '{product.Categories}')"
+            );
+
+            var reader = await _databaseService.ExecuteReaderAsync(
+                $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = (SELECT MAX(id) FROM products)"
+            );
+
+            if (!reader.Read())
+                return null;
+
+            createdProduct =
+                new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
 
             return createdProduct;
         }
@@ -130,69 +92,10 @@ namespace server.Services
         public async Task<List<Product>> UpdateProducts(List<ProductUpdated> products)
         {
             var updatedProducts = new List<Product>();
-            try
+            foreach (var product in products)
             {
-                _databaseService.Open();
-
-                foreach (var product in products)
-                {
-                    String updatedProductQuery = $"UPDATE products SET ";
-
-                    if (product.SupplierID != null)
-                        updatedProductQuery += $"supplier_id = {product.SupplierID}, ";
-                    if (product.Name != null)
-                        updatedProductQuery += $"name = '{product.Name}', ";
-                    if (product.Quantity != null)
-                        updatedProductQuery += $"quantity = {product.Quantity}, ";
-                    if (product.Price != null)
-                        updatedProductQuery += $"price = {product.Price}, ";
-                    if (product.Categories != null)
-                        updatedProductQuery += $"categories = '{product.Categories}', ";
-
-                    updatedProductQuery = updatedProductQuery.Remove(updatedProductQuery.Length - 2);
-                    updatedProductQuery += $" WHERE id = {product.ID}";
-
-                    await _databaseService.ExecuteNonQueryAsync(updatedProductQuery);
-
-                    var reader = await _databaseService.ExecuteReaderAsync(
-                        $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {product.ID}"
-                    );
-
-                    if (!reader.Read())
-                        continue;
-
-                    Product updatedProduct =
-                        new(
-                            reader.GetInt32(0),
-                            reader.GetInt32(1),
-                            reader.GetString(2),
-                            reader.GetInt32(3),
-                            reader.GetDecimal(4),
-                            reader.GetString(5)
-                        );
-
-                    updatedProducts.Add(updatedProduct);
-                }
-
-                _databaseService.Close();
-            }
-            catch (Exception)
-            {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
-            }
-
-            return updatedProducts;
-        }
-
-        public async Task<Product?> UpdateProductById(int key, ProductUpdated product)
-        {
-            Product updatedProduct;
-            try
-            {
-                _databaseService.Open();
-
                 String updatedProductQuery = $"UPDATE products SET ";
+
                 if (product.SupplierID != null)
                     updatedProductQuery += $"supplier_id = {product.SupplierID}, ";
                 if (product.Name != null)
@@ -210,16 +113,13 @@ namespace server.Services
                 await _databaseService.ExecuteNonQueryAsync(updatedProductQuery);
 
                 var reader = await _databaseService.ExecuteReaderAsync(
-                    $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {key}"
+                    $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {product.ID}"
                 );
 
                 if (!reader.Read())
-                {
-                    _databaseService.Close();
-                    return null;
-                }
+                    continue;
 
-                updatedProduct =
+                Product updatedProduct =
                     new(
                         reader.GetInt32(0),
                         reader.GetInt32(1),
@@ -229,32 +129,57 @@ namespace server.Services
                         reader.GetString(5)
                     );
 
-                _databaseService.Close();
+                updatedProducts.Add(updatedProduct);
             }
-            catch (Exception)
-            {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
+
+
+            return updatedProducts;
+        }
+
+        public async Task<Product?> UpdateProductById(int key, ProductUpdated product)
+        {
+            Product updatedProduct;
+
+            String updatedProductQuery = $"UPDATE products SET ";
+            if (product.SupplierID != null)
+                updatedProductQuery += $"supplier_id = {product.SupplierID}, ";
+            if (product.Name != null)
+                updatedProductQuery += $"name = '{product.Name}', ";
+            if (product.Quantity != null)
+                updatedProductQuery += $"quantity = {product.Quantity}, ";
+            if (product.Price != null)
+                updatedProductQuery += $"price = {product.Price}, ";
+            if (product.Categories != null)
+                updatedProductQuery += $"categories = '{product.Categories}', ";
+
+            updatedProductQuery = updatedProductQuery.Remove(updatedProductQuery.Length - 2);
+            updatedProductQuery += $" WHERE id = {product.ID}";
+
+            await _databaseService.ExecuteNonQueryAsync(updatedProductQuery);
+
+            var reader = await _databaseService.ExecuteReaderAsync(
+                $"SELECT id, supplier_id, name, quantity, price, categories FROM products WHERE id = {key}"
+            );
+
+            if (!reader.Read())
                 return null;
-            }
+
+            updatedProduct =
+                new(
+                    reader.GetInt32(0),
+                    reader.GetInt32(1),
+                    reader.GetString(2),
+                    reader.GetInt32(3),
+                    reader.GetDecimal(4),
+                    reader.GetString(5)
+                );
 
             return updatedProduct;
         }
 
         public Task<bool> DeleteProduct(int key)
         {
-            try
-            {
-                _databaseService.Open();
-                _databaseService.ExecuteNonQueryAsync($"DELETE FROM products WHERE id = {key}");
-                _databaseService.Close();
-            }
-            catch (Exception)
-            {
-                if (_databaseService.IsOpen())
-                    _databaseService.Close();
-                return Task<bool>.FromResult(false);
-            }
+            _databaseService.ExecuteNonQueryAsync($"DELETE FROM products WHERE id = {key}");
 
             return Task<bool>.FromResult(true);
         }

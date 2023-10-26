@@ -3,20 +3,45 @@ using Npgsql;
 
 namespace server.Services
 {
+    public class DatabaseConnection
+    {
+        public string Host { get; set; } = "localhost";
+        public string Port { get; set; } = "5432";
+        public string Username { get; set; } = "myusernames";
+        public string Password { get; set; } = "mypassword";
+        public string Database { get; set; } = "inventory_system";
+
+        public override string ToString()
+        {
+            return $"Host={Host};Port={Port};Username={Username};Password={Password};Database={Database}";
+        }
+    }
+
     public class DatabaseService
     {
-        NpgsqlConnection _connection;
+        private readonly NpgsqlConnection _connection;
 
-        public DatabaseService(string connectionString)
+        public DatabaseService(DatabaseConnection dbc)
         {
-            _connection = new NpgsqlConnection(connectionString);
+            _connection = new NpgsqlConnection(dbc.ToString());
+            this.OpenAsync();
         }
 
-        public void Open()
+        public async void OpenAsync()
         {
             if (_connection.State == ConnectionState.Closed)
             {
-                _connection.Open();
+                await _connection.OpenAsync();
+
+                if (_connection.State == ConnectionState.Open)
+                {
+                    System.Console.WriteLine("Database connection opened.");
+                }
+                else if (_connection.State == ConnectionState.Closed)
+                {
+                    System.Console.WriteLine("Database connection failed to open.");
+                    throw new System.Exception("Database connection failed to open.");
+                }
             }
         }
 

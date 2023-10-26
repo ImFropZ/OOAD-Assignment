@@ -8,14 +8,16 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Database Connection
-
-        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-
-        if (string.IsNullOrEmpty(connectionString))
+        var dbc = new DatabaseConnection
         {
-            throw new Exception("DB_CONNECTION_STRING environment variable is not set.");
-        }
-        builder.Services.AddSingleton<DatabaseService>(new DatabaseService(connectionString));
+            Host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost",
+            Port = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432",
+            Username = Environment.GetEnvironmentVariable("DB_USERNAME") ?? "myusername",
+            Password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "mypassword",
+            Database = Environment.GetEnvironmentVariable("DB_DATABASE") ?? "inventory_system"
+        };
+
+        builder.Services.AddSingleton<DatabaseService>(new DatabaseService(dbc));
 
         // Add services to the container.
 
