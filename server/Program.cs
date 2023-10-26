@@ -9,7 +9,12 @@ internal class Program
 
         // Database Connection
 
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new Exception("DB_CONNECTION_STRING environment variable is not set.");
+        }
         builder.Services.AddSingleton<DatabaseService>(new DatabaseService(connectionString));
 
         // Add services to the container.
