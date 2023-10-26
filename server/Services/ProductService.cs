@@ -66,7 +66,7 @@ namespace server.Services
             Product createdProduct;
 
             await _databaseService.ExecuteNonQueryAsync(
-                $"INSERT INTO products (supplier_id, name, quantity, price, categories) VALUES ({product.SupplierID}, '{product.Name}', {product.Quantity}, {product.Price}, '{product.Categories}')"
+                $"INSERT INTO products (id, supplier_id, name, quantity, price, categories) VALUES ('{new Utils().GenerateUUID()}', {product.SupplierID}, '{product.Name}', {product.Quantity}, {product.Price}, '{product.Categories}')"
             );
 
             var reader = await _databaseService.ExecuteReaderAsync(

@@ -50,7 +50,7 @@ namespace server.Services
         public async Task<Supplier?> AddSupplier(SupplierCreated supplier)
         {
             await _databaseService.ExecuteNonQueryAsync(
-                $"INSERT INTO suppliers (name, contact_information) VALUES ('{supplier.Name}', '{supplier.ContactInformation}') RETURNING id, name, contact_information"
+                $"INSERT INTO suppliers (id, name, contact_information) VALUES ('{new Utils().GenerateUUID()}', '{supplier.Name}', '{supplier.ContactInformation}') RETURNING id, name, contact_information"
             );
 
             NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(

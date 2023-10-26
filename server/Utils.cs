@@ -8,4 +8,13 @@ namespace server
         PATCH,
         DELETE
     }
+
+
+    public class Utils
+    {
+        public string GenerateUUID()
+        {
+            return Guid.NewGuid().ToString();
+        }
+    }
 }
