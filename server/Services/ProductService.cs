@@ -1,4 +1,5 @@
 using server.Data;
+using server.Error;
 using server.Models;
 
 namespace server.Services
@@ -20,15 +21,22 @@ namespace server.Services
 
         public Product? GetProductById(string id)
         {
-            var product = _service.Products?.Where(p => p.ID == id).FirstOrDefault();
+            var product = _service
+                .Products?
+                .Where(p => p.ID == id)
+                .FirstOrDefault() ??
+                throw new NotFoundException("Product not found");
+
             return product;
         }
 
-        public async Task<Product?> AddProduct(ProductCreated product)
+        public async Task<Product> AddProduct(ProductCreated product)
         {
             // Check if supplier exists
-            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == product.SupplierID);
-            if (supplier == null) return null;
+            var supplier = _service
+                .Suppliers?
+                .FirstOrDefault(s => s.ID == product.SupplierID) ??
+                throw new NotFoundException("Supplier not found");
 
             var newProduct = new Product()
             {
@@ -61,34 +69,33 @@ namespace server.Services
 
         public async Task<Product?> UpdateProductById(string id, ProductUpdated product)
         {
-            var updatedProduct = _service.Products?.FirstOrDefault(p => p.ID == id);
+            if (product.SupplierID == null &&
+                product.Name == null &&
+                product.Quantity == null &&
+                product.Price == null &&
+                product.Categories == null) throw new BadRequestException("No fields to update");
 
-            if (updatedProduct != null)
-            {
-                if (product.SupplierID != null) updatedProduct.SupplierID = product.SupplierID;
-                if (product.Name != null) updatedProduct.Name = product.Name;
-                if (product.Quantity != null) updatedProduct.Quantity = product.Quantity ?? 0;
-                if (product.Price != null) updatedProduct.Price = product.Price ?? 0;
-                if (product.Categories != null) updatedProduct.Categories = product.Categories;
 
-                await _service.SaveChangesAsync();
-            }
+            var updatedProduct = (_service.Products?.FirstOrDefault(p => p.ID == id)) ?? throw new NotFoundException("Product not found");
+
+            if (product.SupplierID != null) updatedProduct.SupplierID = product.SupplierID;
+            if (product.Name != null) updatedProduct.Name = product.Name;
+            if (product.Quantity != null) updatedProduct.Quantity = product.Quantity ?? 0;
+            if (product.Price != null) updatedProduct.Price = product.Price ?? 0;
+            if (product.Categories != null) updatedProduct.Categories = product.Categories;
+
+            await _service.SaveChangesAsync();
 
             return updatedProduct;
         }
 
         public async Task<bool> DeleteProductAsync(string id)
         {
-            var product = _service.Products?.FirstOrDefault(p => p.ID == id);
+            var product = _service.Products?.FirstOrDefault(p => p.ID == id) ?? throw new NotFoundException("Product not found");
 
-            if (product != null)
-            {
-                _service.Products?.Remove(product);
-                await _service.SaveChangesAsync();
-                return true;
-            }
-
-            return false;
+            _service.Products?.Remove(product);
+            await _service.SaveChangesAsync();
+            return true;
         }
     }
 }

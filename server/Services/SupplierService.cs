@@ -1,5 +1,6 @@
 ﻿using server.Models;
 using server.Data;
+using server.Error;
 
 namespace server.Services
 {
@@ -15,18 +16,16 @@ namespace server.Services
         public List<Supplier> GetSuppliers()
         {
             var suppliers = _service.Suppliers?.ToList();
-
             return suppliers ?? new List<Supplier>();
         }
 
-        public Supplier? GetSupplier(string id)
+        public Supplier GetSupplier(string id)
         {
-            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id);
-
+            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id) ?? throw new NotFoundException("Supplier not found");
             return supplier;
         }
 
-        public async Task<Supplier?> AddSupplier(SupplierCreated supplier)
+        public async Task<Supplier> AddSupplier(SupplierCreated supplier)
         {
             var newSupplier = new Supplier()
             {
@@ -43,8 +42,7 @@ namespace server.Services
 
         public async Task<Supplier?> UpdateSupplier(string id, SupplierUpdated supplier)
         {
-            if (supplier.Name == null && supplier.ContactInformation == null) return null;
-
+            if (supplier.Name == null && supplier.ContactInformation == null) throw new BadRequestException("No fields to update");
             var updatedSupplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id);
 
             if (updatedSupplier != null)
@@ -64,8 +62,8 @@ namespace server.Services
 
             foreach (var supplier in suppliers)
             {
-                if (supplier.ID == null) continue;
-                var updatedSupplier = await this.UpdateSupplier(supplier.ID, supplier);
+                if (supplier.ID == null || supplier.Name == null && supplier.ContactInformation == null) continue;
+                var updatedSupplier = await UpdateSupplier(supplier.ID, supplier);
 
                 if (updatedSupplier != null)
                     updatedSuppliers.Add(updatedSupplier);
@@ -76,16 +74,11 @@ namespace server.Services
 
         public async Task<bool> DeleteSupplier(string id)
         {
-            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id);
+            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id) ?? throw new NotFoundException("Supplier not found");
 
-            if (supplier != null)
-            {
-                _service.Suppliers?.Remove(supplier);
-                await _service.SaveChangesAsync();
-                return true;
-            }
-
-            return false;
+            _service.Suppliers?.Remove(supplier);
+            await _service.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -2,6 +2,7 @@
 using server.Models;
 using server.Services;
 using server.Data;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace server.Controllers
 {
@@ -19,6 +20,7 @@ namespace server.Controllers
         [HttpGet]
         public ActionResult<Result<IEnumerable<Supplier>>> GetSuppliers()
         {
+            Console.WriteLine();
             return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers()));
         }
 
@@ -31,7 +33,8 @@ namespace server.Controllers
         [HttpPost]
         public ActionResult<Result<Supplier?>> CreateSupplier(SupplierCreated payload)
         {
-            return Ok(new Result<Supplier?>(_supplierService.AddSupplier(payload).Result));
+            var supplier = _supplierService.AddSupplier(payload).Result;
+            return Created($"{Request.GetDisplayUrl()}/{supplier.ID}", new Result<Supplier?>(supplier));
         }
 
         [HttpPut]

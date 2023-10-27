@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using server.Data;
 using server.Models;
 using server.Services;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace server.Controllers
 {
@@ -31,9 +32,10 @@ namespace server.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Result<Product?>> CreateProduct([FromBody] ProductCreated product)
+        public ActionResult<Result<Product?>> CreateProduct([FromBody] ProductCreated payload)
         {
-            return Ok(new Result<Product?>(_productService.AddProduct(product).Result));
+            var product = _productService.AddProduct(payload).Result;
+            return Created($"{Request.GetDisplayUrl()}/{product.ID}", new Result<Product?>(product));
         }
 
         [HttpPut]
