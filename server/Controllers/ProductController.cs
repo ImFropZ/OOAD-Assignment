@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using server.Data;
 using server.Models;
 using server.Services;
 
@@ -11,22 +12,22 @@ namespace server.Controllers
         private readonly ProductService _productService;
         private readonly ILogger<ProductController> _logger;
 
-        public ProductController(ILogger<ProductController> logger, DatabaseService databaseService)
+        public ProductController(ILogger<ProductController> logger, InventoryDbContext _databaseService)
         {
             _logger = logger;
-            _productService = new ProductService(databaseService);
+            _productService = new ProductService(_databaseService);
         }
 
         [HttpGet]
         public ActionResult<Result<IEnumerable<Product>>> GetProducts()
         {
-            return Ok(new Result<IEnumerable<Product>>(_productService.GetProducts().Result));
+            return Ok(new Result<IEnumerable<Product>>(_productService.GetProducts()));
         }
 
         [HttpGet("{id}")]
         public ActionResult<Result<Product?>> GetProductById(string id)
         {
-            return Ok(new Result<Product?>(_productService.GetProductById(id).Result));
+            return Ok(new Result<Product?>(_productService.GetProductById(id)));
         }
 
         [HttpPost]
