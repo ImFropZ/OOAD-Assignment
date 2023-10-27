@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
 using server.Services;
+using server.Data;
 
 namespace server.Controllers
 {
@@ -10,7 +11,7 @@ namespace server.Controllers
     {
         private readonly SupplierService _supplierService;
 
-        public SupplierController(DatabaseService _databaseService)
+        public SupplierController(InventoryDbContext _databaseService)
         {
             _supplierService = new SupplierService(_databaseService);
         }
@@ -18,13 +19,13 @@ namespace server.Controllers
         [HttpGet]
         public ActionResult<Result<IEnumerable<Supplier>>> GetSuppliers()
         {
-            return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers().Result));
+            return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers()));
         }
 
         [HttpGet("{id}")]
         public ActionResult<Result<Supplier?>> GetSupplierById(string id)
         {
-            return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id).Result));
+            return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id)));
         }
 
         [HttpPost]

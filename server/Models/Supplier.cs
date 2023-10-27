@@ -1,42 +1,24 @@
-﻿namespace server.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace server.Models
 {
     public class Supplier
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public string ContactInformation { get; set; }
-
-        public Supplier(string id, string name, string contactInformation)
-        {
-            ID = id;
-            Name = name;
-            ContactInformation = contactInformation;
-        }
+        [Required, Key] public string? ID { get; set; }
+        [Required] public string? Name { get; set; }
+        [Required] public string? ContactInformation { get; set; }
     }
 
     public class SupplierCreated
     {
-        public string Name { get; set; }
-        public string ContactInformation { get; set; }
-
-        public SupplierCreated(string name, string contactInformation)
-        {
-            Name = name;
-            ContactInformation = contactInformation;
-        }
+        [Required] public string? Name { get; set; }
+        [Required] public string? ContactInformation { get; set; }
     }
 
     public class SupplierUpdated
     {
-        public string ID { get; set; }
-        public string? Name { get; set; }
-        public string? ContactInformation { get; set; }
-
-        public SupplierUpdated(string id, string? name, string? contactInformation)
-        {
-            ID = id;
-            Name = name;
-            ContactInformation = contactInformation;
-        }
+        public string? ID { get; set; }
+        [Required] public string? Name { get; set; }
+        [Required] public string? ContactInformation { get; set; }
     }
 }
