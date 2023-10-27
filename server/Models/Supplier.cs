@@ -2,11 +2,11 @@
 {
     public class Supplier
     {
-        public int ID { get; set; }
+        public string ID { get; set; }
         public string Name { get; set; }
         public string ContactInformation { get; set; }
 
-        public Supplier(int id, string name, string contactInformation)
+        public Supplier(string id, string name, string contactInformation)
         {
             ID = id;
             Name = name;
@@ -28,11 +28,11 @@
 
     public class SupplierUpdated
     {
-        public int ID { get; set; }
+        public string ID { get; set; }
         public string? Name { get; set; }
         public string? ContactInformation { get; set; }
 
-        public SupplierUpdated(int id, string? name, string? contactInformation)
+        public SupplierUpdated(string id, string? name, string? contactInformation)
         {
             ID = id;
             Name = name;

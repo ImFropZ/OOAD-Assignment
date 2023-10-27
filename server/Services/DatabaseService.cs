@@ -24,10 +24,13 @@ namespace server.Services
         public DatabaseService(DatabaseConnection dbc)
         {
             _connection = new NpgsqlConnection(dbc.ToString());
-            this.OpenAsync();
+            this.OpenAsync().ContinueWith(isOpened =>
+            {
+                this.CloseAsync();
+            });
         }
 
-        public async void OpenAsync()
+        public async Task<bool> OpenAsync()
         {
             if (_connection.State == ConnectionState.Closed)
             {
@@ -35,27 +38,36 @@ namespace server.Services
 
                 if (_connection.State == ConnectionState.Open)
                 {
-                    System.Console.WriteLine("Database connection opened.");
+                    return true;
                 }
                 else if (_connection.State == ConnectionState.Closed)
                 {
                     System.Console.WriteLine("Database connection failed to open.");
                     throw new System.Exception("Database connection failed to open.");
                 }
+
+                return false;
             }
+
+            return false;
         }
 
-        public void Close()
+        public async void CloseAsync()
         {
             if (_connection.State == ConnectionState.Open)
             {
-                _connection.Close();
+                await _connection.CloseAsync();
             }
         }
 
         public bool IsOpen()
         {
             return _connection.State == ConnectionState.Open;
+        }
+
+        public async void DisposeAsync()
+        {
+            await _connection.DisposeAsync();
         }
 
         public ConnectionState State()

@@ -16,58 +16,95 @@ namespace server.Services
         {
             List<Supplier> suppliers = new();
 
-            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                "SELECT id, name, contact_information FROM suppliers"
-            );
-
-            while (await reader.ReadAsync())
+            try
             {
-                Supplier supplier =
-                    new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
+                await _databaseService.OpenAsync();
 
-                suppliers.Add(supplier);
+                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                    "SELECT id, name, contact_information FROM suppliers"
+                );
+
+                while (await reader.ReadAsync())
+                {
+                    Supplier supplier =
+                        new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+
+                    suppliers.Add(supplier);
+                }
+
+                _databaseService.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _databaseService.DisposeAsync();
             }
 
             return suppliers;
         }
 
-        public async Task<Supplier?> GetSupplier(int id)
+        public async Task<Supplier?> GetSupplier(string id)
         {
-            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                $"SELECT id, name, contact_information FROM suppliers WHERE id = {id}"
-            );
-
-            if (reader.Read())
+            try
             {
-                Supplier supplier =
-                    new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
-                return supplier;
-            }
+                await _databaseService.OpenAsync();
 
+                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                    $"SELECT id, name, contact_information FROM suppliers WHERE id = '{id}'"
+                );
+
+                if (reader.Read())
+                {
+                    Supplier supplier =
+                        new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+                    _databaseService.CloseAsync();
+                    return supplier;
+                }
+
+                _databaseService.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _databaseService.DisposeAsync();
+            }
             return null;
         }
 
         public async Task<Supplier?> AddSupplier(SupplierCreated supplier)
         {
-            await _databaseService.ExecuteNonQueryAsync(
-                $"INSERT INTO suppliers (id, name, contact_information) VALUES ('{new Utils().GenerateUUID()}', '{supplier.Name}', '{supplier.ContactInformation}') RETURNING id, name, contact_information"
-            );
-
-            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                $"SELECT id, name, contact_information FROM suppliers WHERE name = '{supplier.Name}' AND contact_information = '{supplier.ContactInformation}'"
-            );
-
-            if (reader.Read())
+            try
             {
-                Supplier createdSupplier =
-                    new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
-                return createdSupplier;
+                await _databaseService.OpenAsync();
+
+                await _databaseService.ExecuteNonQueryAsync(
+                    $"INSERT INTO suppliers (id, name, contact_information) VALUES ('{new Utils().GenerateUUID()}', '{supplier.Name}', '{supplier.ContactInformation}') RETURNING id, name, contact_information"
+                );
+
+                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                    $"SELECT id, name, contact_information FROM suppliers WHERE name = '{supplier.Name}' AND contact_information = '{supplier.ContactInformation}'"
+                );
+
+                if (reader.Read())
+                {
+                    Supplier createdSupplier =
+                        new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+                    _databaseService.CloseAsync();
+                    return createdSupplier;
+                }
+
+                _databaseService.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _databaseService.DisposeAsync();
             }
 
             return null;
         }
 
-        public async Task<Supplier?> UpdateSupplier(int id, SupplierUpdated supplier)
+        public async Task<Supplier?> UpdateSupplier(string id, SupplierUpdated supplier)
         {
             string updateQuery = "UPDATE suppliers SET ";
             if (supplier.Name == null && supplier.ContactInformation == null)
@@ -79,21 +116,31 @@ namespace server.Services
                 updateQuery += $"contact_information = '{supplier.ContactInformation}', ";
 
             updateQuery = updateQuery.Remove(updateQuery.Length - 2);
-            updateQuery += $" WHERE id = {id}";
+            updateQuery += $" WHERE id = '{id}'";
 
-            await _databaseService.ExecuteNonQueryAsync(updateQuery);
-
-            NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
-                $"SELECT id, name, contact_information FROM suppliers WHERE id = {id}"
-            );
-
-            if (reader.Read())
+            try
             {
-                Supplier updatedSupplier =
-                    new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
-                return updatedSupplier;
-            }
+                await _databaseService.ExecuteNonQueryAsync(updateQuery);
 
+                NpgsqlDataReader reader = await _databaseService.ExecuteReaderAsync(
+                    $"SELECT id, name, contact_information FROM suppliers WHERE id = '{id}'"
+                );
+
+                if (reader.Read())
+                {
+                    Supplier updatedSupplier =
+                        new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+                    _databaseService.CloseAsync();
+                    return updatedSupplier;
+                }
+
+                _databaseService.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _databaseService.DisposeAsync();
+            }
             return null;
         }
 
@@ -114,12 +161,23 @@ namespace server.Services
             return updatedSuppliers;
         }
 
-        public async Task<bool> DeleteSupplier(int id)
+        public async Task<bool> DeleteSupplier(string id)
         {
-            await _databaseService.ExecuteNonQueryAsync(
-                $"DELETE FROM suppliers WHERE id = {id}"
-            );
-            return false;
+            try
+            {
+                await _databaseService.OpenAsync();
+                await _databaseService.ExecuteNonQueryAsync(
+                    $"DELETE FROM suppliers WHERE id = '{id}'"
+                );
+                _databaseService.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _databaseService.DisposeAsync();
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -22,8 +22,9 @@ namespace server.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Result<Supplier?>> GetSupplierById(int id)
+        public ActionResult<Result<Supplier?>> GetSupplierById(string id)
         {
+            Console.WriteLine(id);
             return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id).Result));
         }
 
@@ -44,13 +45,13 @@ namespace server.Controllers
         }
 
         [HttpPatch("{id}")]
-        public ActionResult<Result<Supplier?>> UpdateSupplierById(int id, SupplierUpdated payload)
+        public ActionResult<Result<Supplier?>> UpdateSupplierById(string id, SupplierUpdated payload)
         {
             return Ok(new Result<Supplier?>(_supplierService.UpdateSupplier(id, payload).Result));
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<Result<bool>> DeleteSupplierById(int id)
+        public ActionResult<Result<bool>> DeleteSupplierById(string id)
         {
             return Ok(new Result<bool>(_supplierService.DeleteSupplier(id).Result));
         }

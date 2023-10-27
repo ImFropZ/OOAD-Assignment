@@ -1,64 +1,63 @@
-using System;
-
-namespace server.Models;
-
-public class Product
+namespace server.Models
 {
-    public int ID { get; set; }
-    public int SupplierID { get; set; }
-    public String Name { get; set; }
-    public int Quantity { get; set; }
-    public decimal Price { get; set; }
-    public String Categories { get; set; }
-
-    public Product(
-        int id,
-        int supplierID,
-        String name,
-        int quantity,
-        decimal price,
-        String categories
-    )
+    public class Product
     {
-        ID = id;
-        SupplierID = supplierID;
-        Name = name;
-        Quantity = quantity;
-        Price = price;
-        Categories = categories;
+        public string ID { get; set; }
+        public string SupplierID { get; set; }
+        public string Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string Categories { get; set; }
+
+        public Product(
+            string id,
+            string supplierID,
+            string name,
+            int quantity,
+            decimal price,
+            string categories
+        )
+        {
+            ID = id;
+            SupplierID = supplierID;
+            Name = name;
+            Quantity = quantity;
+            Price = price;
+            Categories = categories;
+        }
     }
-}
 
-public class ProductCreated
-{
-    public int SupplierID { get; set; }
-    public String Name { get; set; }
-    public int Quantity { get; set; }
-    public decimal Price { get; set; }
-    public String Categories { get; set; }
-
-    public ProductCreated(
-        int supplierID,
-        String name,
-        int quantity,
-        decimal price,
-        String categories
-    )
+    public class ProductCreated
     {
-        SupplierID = supplierID;
-        Name = name;
-        Quantity = quantity;
-        Price = price;
-        Categories = categories;
-    }
-}
+        public string SupplierID { get; set; }
+        public string Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string Categories { get; set; }
 
-public class ProductUpdated
-{
-    public int ID { get; set; }
-    public int? SupplierID { get; set; }
-    public String? Name { get; set; }
-    public int? Quantity { get; set; }
-    public decimal? Price { get; set; }
-    public String? Categories { get; set; }
+        public ProductCreated(
+            string supplierID,
+            string name,
+            int quantity,
+            decimal price,
+            string categories
+        )
+        {
+            SupplierID = supplierID;
+            Name = name;
+            Quantity = quantity;
+            Price = price;
+            Categories = categories;
+        }
+    }
+
+    public class ProductUpdated
+    {
+        public string? ID { get; set; }
+        public string? SupplierID { get; set; }
+        public string? Name { get; set; }
+        public int? Quantity { get; set; }
+        public decimal? Price { get; set; }
+        public string? Categories { get; set; }
+    }
 }
