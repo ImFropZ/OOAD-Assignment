@@ -26,6 +26,10 @@ namespace server.Services
 
         public async Task<Product?> AddProduct(ProductCreated product)
         {
+            // Check if supplier exists
+            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == product.SupplierID);
+            if (supplier == null) return null;
+
             var newProduct = new Product()
             {
                 ID = Guid.NewGuid().ToString(),
