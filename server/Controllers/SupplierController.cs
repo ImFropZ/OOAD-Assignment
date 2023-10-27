@@ -24,7 +24,6 @@ namespace server.Controllers
         [HttpGet("{id}")]
         public ActionResult<Result<Supplier?>> GetSupplierById(string id)
         {
-            Console.WriteLine(id);
             return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id).Result));
         }
 
