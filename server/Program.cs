@@ -7,6 +7,9 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Ensure the database is created
+        new InventoryDbContext().Database.EnsureCreated();
+
         builder.Services.AddSingleton(new InventoryDbContext());
 
         // Add services to the container.
