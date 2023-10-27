@@ -1,3 +1,5 @@
+using server.Error;
+
 namespace server.Middlewares
 {
     public class GlobalErrorHandlerMiddleware
@@ -15,11 +17,17 @@ namespace server.Middlewares
             {
                 await _next(context);
             }
+            catch (ServerError e)
+            {
+                context.Response.StatusCode = e.StatusCode;
+                await context.Response.WriteAsync(e.Message);
+                return;
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 context.Response.StatusCode = 500;
-                await context.Response.WriteAsync(e.Message);
+                return;
             }
         }
     }
