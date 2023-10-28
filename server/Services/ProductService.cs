@@ -78,7 +78,15 @@ namespace server.Services
 
             var updatedProduct = (_service.Products?.FirstOrDefault(p => p.ID == id)) ?? throw new NotFoundException("Product not found");
 
-            if (product.SupplierID != null) updatedProduct.SupplierID = product.SupplierID;
+            if (product.SupplierID != null) {
+                // Check if supplier exists
+                var supplier = _service
+                    .Suppliers?
+                    .FirstOrDefault(s => s.ID == product.SupplierID);
+
+                if (supplier != null)
+                    updatedProduct.SupplierID = product.SupplierID;
+            }
             if (product.Name != null) updatedProduct.Name = product.Name;
             if (product.Quantity != null) updatedProduct.Quantity = product.Quantity ?? 0;
             if (product.Price != null) updatedProduct.Price = product.Price ?? 0;

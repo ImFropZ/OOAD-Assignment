@@ -20,7 +20,6 @@ namespace server.Controllers
         [HttpGet]
         public ActionResult<Result<IEnumerable<Supplier>>> GetSuppliers()
         {
-            Console.WriteLine();
             return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers()));
         }
 
