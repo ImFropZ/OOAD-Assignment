@@ -1,5 +1,5 @@
 using server.Data;
-using server.Error;
+using server.Exceptions;
 using server.Models;
 
 namespace server.Services
@@ -36,7 +36,7 @@ namespace server.Services
             var supplier = _service
                 .Suppliers?
                 .FirstOrDefault(s => s.ID == product.SupplierID) ??
-                throw new NotFoundException("Supplier not found");
+                throw new BadRequestException("Supplier not found");
 
             var newProduct = new Product()
             {

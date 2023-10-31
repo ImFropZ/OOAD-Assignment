@@ -1,6 +1,6 @@
 ﻿using server.Models;
 using server.Data;
-using server.Error;
+using server.Exceptions;
 
 namespace server.Services
 {
