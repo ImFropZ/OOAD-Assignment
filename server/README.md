@@ -8,7 +8,8 @@ As you can see from above the system have 2 tables Suppliers and Products.
 In this models:
 - Each products can have only one supplier
 - Each supplier can have 0 or more products
-So we can say **that** our relation of this 2 models are one-to-many relation ship
+
+So we can say our relation of this 2 tables are one-to-many relationship
 
 ### Product
 
