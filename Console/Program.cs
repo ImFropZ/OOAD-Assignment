@@ -1,11 +1,77 @@
-﻿using Spectre.Console;
+﻿using server.Models;
+using Spectre.Console;
+using Newtonsoft.Json;
 
 namespace Console;
 
 public static class Program
 {
+    public static List<Product> Products;
+    public static List<Supplier> Suppliers;
+
+    public static HttpClient CreateHttpClient()
+    {
+        HttpClientHandler handler = new HttpClientHandler()
+        {
+            ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+        };
+
+        HttpClient client = new HttpClient(handler);
+        return client;
+    }
+
+    static async Task<List<Product>> GetProducts(string apiUrl)
+    {
+        using var client = CreateHttpClient();
+        var response = await client.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<Result<List<Product>>>(jsonString);
+
+            // Assuming ApiResponse class has a Data property of type List<Product>
+            return apiResponse?.Data ?? new List<Product>();
+        }
+        else
+        {
+            throw new HttpRequestException($"HTTP request failed with status code {response.StatusCode}");
+        }
+    }
+
+    static async Task<List<Supplier>> GetSuppliers(string apiUrl)
+    {
+        using var client = CreateHttpClient();
+        var response = await client.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<Result<List<Supplier>>>(jsonString);
+
+            // Assuming ApiResponse class has a Data property of type List<Product>
+            return apiResponse?.Data ?? new List<Supplier>();
+        }
+        else
+        {
+            throw new HttpRequestException($"HTTP request failed with status code {response.StatusCode}");
+        }
+    }
+
+
+    public static async Task FetchData()
+    {
+        var products = await GetProducts("https://localhost:7177/api/products");
+        var suppliers = await GetSuppliers("https://localhost:7177/api/suppliers");
+
+        Products = products;
+        Suppliers = suppliers;
+    }
+
     public static void Main(string[] args)
     {
+        FetchData().Wait();
+
         AnsiConsole.MarkupLine("[blue]Welcome to the Small Inventory System![/]");
         AnsiConsole.Clear();
         MainMenu();
@@ -44,19 +110,22 @@ public static class Program
                     "[green]What do you want to do?[/]\n[grey]Navigate with arrow keys up/down and press enter to select.[/]")
                 .AddChoices(new[]
                 {
-                    "Add", "Remove", "Update", "[green]Back into main menu[/]", "[red]Exit[/]"
+                    "View", "Add", "Remove", "Update", "[green]Back into main menu[/]", "[red]Exit[/]"
                 }));
 
         switch (mode)
         {
+            case ("View"):
+                new ProductActions().View();
+                break;
             case ("Add"):
-                new ProductActions().Add();
+                new ProductActions().Add().Wait();
                 break;
             case ("Remove"):
-                new ProductActions().Remove();
+                new ProductActions().Remove().Wait();
                 break;
             case ("Update"):
-                new ProductActions().Update();
+                new ProductActions().Update().Wait();
                 break;
             case ("[green]Back into main menu[/]"):
                 MainMenu();
@@ -75,19 +144,22 @@ public static class Program
                     "[green]What do you want to do?[/]\n[grey]Navigate with arrow keys up/down and press enter to select.[/]")
                 .AddChoices(new[]
                 {
-                    "Add", "Remove", "Update", "[green]Back into main menu[/]", "[red]Exit[/]"
+                    "View", "Add", "Remove", "Update", "[green]Back into main menu[/]", "[red]Exit[/]"
                 }));
-        
+
         switch (mode)
         {
+            case ("View"):
+                new SupplierActions().View();
+                break;
             case ("Add"):
-                new SupplierActions().Add();
+                new SupplierActions().Add().Wait();
                 break;
             case ("Remove"):
-                new SupplierActions().Remove();
+                new SupplierActions().Remove().Wait();
                 break;
             case ("Update"):
-                new SupplierActions().Update();
+                new SupplierActions().Update().Wait();
                 break;
             case ("[green]Back into main menu[/]"):
                 MainMenu();

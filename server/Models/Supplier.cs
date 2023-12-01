@@ -4,7 +4,7 @@ namespace server.Models
 {
     public class Supplier
     {
-        [Required, Key] public string? ID { get; set; }
+        [Required, Key] public string? Id { get; set; }
         [Required] public string? Name { get; set; }
         [Required] public string? ContactInformation { get; set; }
     }
@@ -17,7 +17,7 @@ namespace server.Models
 
     public class SupplierUpdated
     {
-        public string? ID { get; set; }
+        public string? Id { get; set; }
         [Required] public string? Name { get; set; }
         [Required] public string? ContactInformation { get; set; }
     }

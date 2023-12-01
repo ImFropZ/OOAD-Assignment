@@ -19,5 +19,7 @@
             Message = "Success";
             Data = data;
         }
+        
+        public Result() { }
     }
 }

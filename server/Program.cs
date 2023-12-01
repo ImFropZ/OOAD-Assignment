@@ -1,13 +1,14 @@
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using server.Data;
+using server;
 using server.Middlewares;
 using server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure the database is created
-new InventoryDbContext().Database.EnsureCreated();
+builder.Services.AddDbContext<IDbContext, PostgresDbContext>(optionsBuilder => {
+    optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("Default"));
+});
 
 // Add services to the container.
 
@@ -19,8 +20,6 @@ builder.Services.AddSwaggerGen((c) =>
     c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Small Inventory System", Version = "v1.0" });
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
-
-builder.Services.AddSingleton<InventoryDbContext>();
 
 builder.Services.AddTransient<ProductService>();
 builder.Services.AddTransient<SupplierService>();

@@ -1,3 +1,5 @@
+using System.Text;
+using Newtonsoft.Json;
 using server.Models;
 using Spectre.Console;
 
@@ -14,7 +16,7 @@ public class SupplierActions
 
         foreach (var supplier in suppliers)
         {
-            table.AddRow(supplier.ID ?? "", supplier.Name ?? "", supplier.ContactInformation ?? "");
+            table.AddRow(supplier.Id ?? "", supplier.Name ?? "", supplier.ContactInformation ?? "");
         }
 
         AnsiConsole.Write(table);
@@ -27,12 +29,22 @@ public class SupplierActions
         table.AddColumn("Name");
         table.AddColumn("Contact Information");
 
-        table.AddRow(supplier.ID ?? "Generate", supplier.Name ?? "", supplier.ContactInformation ?? "");
+        table.AddRow(supplier.Id ?? "Generate", supplier.Name ?? "", supplier.ContactInformation ?? "");
 
         AnsiConsole.Write(table);
     }
+    
+    public void View()
+    {
+        SupplierTableGrid(Program.Suppliers);
+        
+        AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+        System.Console.ReadKey();
+        AnsiConsole.Clear();
+        Program.ProductView();
+    }
 
-    public void Add()
+    public async Task Add()
     {
         AnsiConsole.MarkupLine("[blue]Add supplier[/]");
 
@@ -41,38 +53,42 @@ public class SupplierActions
 
         AnsiConsole.MarkupLine("[green]Preview the supplier details[/]");
 
-        SupplierDetailsView(new Supplier()
+        var newSupplier = new Supplier()
         {
             Name = name,
             ContactInformation = contactInformation
-        });
+        };
+
+        SupplierDetailsView(newSupplier);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
-
         System.Console.ReadKey();
 
-        AnsiConsole.Clear();
+        using var client = Program.CreateHttpClient();
+        {
+            var response = await client.PostAsync("https://localhost:7177/api/Suppliers",
+                new StringContent(JsonConvert.SerializeObject(newSupplier), Encoding.UTF8, "application/json"));
 
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("[red]Failed to add supplier.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.SupplierView();
+            }
+        }
+
+        await Program.FetchData();
+
+        AnsiConsole.Clear();
         Program.SupplierView();
     }
 
-    public void Remove()
+    public async Task Remove()
     {
         AnsiConsole.MarkupLine("[blue]Remove supplier[/]");
-        var suppliers = new List<Supplier>();
-
-        // TODO: Supplier api
-        for (var i = 0; i < 10; i++)
-        {
-            suppliers.Add(new Supplier()
-            {
-                ID = i + "",
-                Name = $"Example Name - {i}",
-                ContactInformation = $"Example Contact Information - {i}"
-            });
-        }
-
-        SupplierTableGrid(suppliers);
+        SupplierTableGrid(Program.Suppliers);
 
         var id = AnsiConsole.Ask<string>("Supplier Id? [grey]Enter -1 to cancel[/]");
 
@@ -84,39 +100,46 @@ public class SupplierActions
 
         AnsiConsole.MarkupLine("[green]Preview the supplier details[/]");
 
-        // TODO: Fake Supplier
-        SupplierDetailsView(new Supplier()
+        var found = Program.Suppliers.Find(x => x.Id == id);
+
+        if (found == null)
         {
-            ID = id,
-            Name = "Example",
-            ContactInformation = "Example Information"
-        });
+            AnsiConsole.MarkupLine("[red]Supplier not found.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.SupplierView();
+        }
+
+        SupplierDetailsView(found);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
 
-        AnsiConsole.Clear();
+        using var client = Program.CreateHttpClient();
+        {
+            var response = await client.DeleteAsync($"https://localhost:7177/api/Suppliers/{id}");
 
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("[red]Failed to remove supplier.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.SupplierView();
+            }
+        }
+
+        await Program.FetchData();
+
+        AnsiConsole.Clear();
         Program.SupplierView();
     }
 
-    public void Update()
+    public async Task Update()
     {
         AnsiConsole.MarkupLine("[blue]Update supplier[/]");
-        // TODO:
-        var suppliers = new List<Supplier>();
-
-        for (var i = 0; i < 10; i++)
-        {
-            suppliers.Add(new Supplier()
-            {
-                ID = i + "",
-                Name = $"Product - {i}",
-                ContactInformation = $"Contact Information - {i}"
-            });
-        }
-
-        SupplierTableGrid(suppliers);
+        SupplierTableGrid(Program.Suppliers);
 
         var id = AnsiConsole.Ask<string>("Supplier Id? [grey]Enter -1 to cancel[/]");
 
@@ -128,13 +151,18 @@ public class SupplierActions
 
         AnsiConsole.MarkupLine("[green]Preview the product details[/]");
 
-        // TODO: Fake products
-        SupplierDetailsView(new Supplier()
+        var found = Program.Suppliers.Find(x => x.Id == id);
+
+        if (found == null)
         {
-            ID = id,
-            Name = "Example",
-            ContactInformation = "Example Info"
-        });
+            AnsiConsole.MarkupLine("[red]Supplier not found.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.SupplierView();
+        }
+
+        SupplierDetailsView(found);
 
         var name = AnsiConsole.Prompt(
             new TextPrompt<string>("[[Optional]] Supplier Name?").AllowEmpty());
@@ -143,16 +171,35 @@ public class SupplierActions
 
         AnsiConsole.MarkupLine("[green]Preview update supplier details[/]");
 
-        SupplierDetailsView(new Supplier()
+        var updatedSupplier = new Supplier()
         {
-            ID = id,
-            Name = name == "" ? "Example" : name,
-            ContactInformation = contactInformation == "" ? "Example Info" : contactInformation
-        });
+            Id = id,
+            Name = name == "" ? found.Name : name,
+            ContactInformation = contactInformation == "" ? found.ContactInformation : contactInformation
+        };
+
+        SupplierDetailsView(updatedSupplier);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
+        
+        using var client = Program.CreateHttpClient();
+        {
+            var response = await client.PutAsync($"https://localhost:7177/api/Suppliers/{id}",
+                new StringContent(JsonConvert.SerializeObject(updatedSupplier), Encoding.UTF8, "application/json"));
 
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("[red]Failed to update supplier.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.SupplierView();
+            }
+        }
+        
+        await Program.FetchData();
+        
         AnsiConsole.Clear();
         Program.SupplierView();
     }

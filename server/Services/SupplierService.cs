@@ -1,27 +1,26 @@
 ﻿using server.Models;
-using server.Data;
 using server.Exceptions;
 
 namespace server.Services
 {
     public class SupplierService
     {
-        private readonly InventoryDbContext _service;
+        private readonly IDbContext _context;
 
-        public SupplierService(InventoryDbContext service)
+        public SupplierService(IDbContext context)
         {
-            _service = service;
+            _context = context;
         }
 
         public List<Supplier> GetSuppliers()
         {
-            var suppliers = _service.Suppliers?.ToList();
+            var suppliers = _context.Suppliers?.ToList();
             return suppliers ?? new List<Supplier>();
         }
 
         public Supplier GetSupplier(string id)
         {
-            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id) ?? throw new NotFoundException("Supplier not found");
+            var supplier = _context.Suppliers?.FirstOrDefault(s => s.Id == id) ?? throw new NotFoundException("Supplier not found");
             return supplier;
         }
 
@@ -29,13 +28,13 @@ namespace server.Services
         {
             var newSupplier = new Supplier()
             {
-                ID = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid().ToString(),
                 Name = supplier.Name,
                 ContactInformation = supplier.ContactInformation
             };
 
-            _service.Suppliers?.Add(newSupplier);
-            await _service.SaveChangesAsync();
+            _context.Suppliers?.Add(newSupplier);
+            _context.SaveChanges();
 
             return newSupplier;
         }
@@ -43,14 +42,14 @@ namespace server.Services
         public async Task<Supplier?> UpdateSupplier(string id, SupplierUpdated supplier)
         {
             if (supplier.Name == null && supplier.ContactInformation == null) throw new BadRequestException("No fields to update");
-            var updatedSupplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id);
+            var updatedSupplier = _context.Suppliers?.FirstOrDefault(s => s.Id == id);
 
             if (updatedSupplier != null)
             {
                 if (supplier.Name != null) updatedSupplier.Name = supplier.Name;
                 if (supplier.ContactInformation != null) updatedSupplier.ContactInformation = supplier.ContactInformation;
 
-                await _service.SaveChangesAsync();
+                _context.SaveChanges();
             }
 
             return updatedSupplier;
@@ -62,8 +61,8 @@ namespace server.Services
 
             foreach (var supplier in suppliers)
             {
-                if (supplier.ID == null || supplier.Name == null && supplier.ContactInformation == null) continue;
-                var updatedSupplier = await UpdateSupplier(supplier.ID, supplier);
+                if (supplier.Id == null || supplier.Name == null && supplier.ContactInformation == null) continue;
+                var updatedSupplier = await UpdateSupplier(supplier.Id, supplier);
 
                 if (updatedSupplier != null)
                     updatedSuppliers.Add(updatedSupplier);
@@ -74,10 +73,10 @@ namespace server.Services
 
         public async Task<bool> DeleteSupplier(string id)
         {
-            var supplier = _service.Suppliers?.FirstOrDefault(s => s.ID == id) ?? throw new NotFoundException("Supplier not found");
+            var supplier = _context.Suppliers?.FirstOrDefault(s => s.Id == id) ?? throw new NotFoundException("Supplier not found");
 
-            _service.Suppliers?.Remove(supplier);
-            await _service.SaveChangesAsync();
+            _context.Suppliers?.Remove(supplier);
+            _context.SaveChanges();
             return true;
         }
     }

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using server.Data;
 using server.Models;
 using server.Services;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -10,32 +9,30 @@ namespace server.Controllers
     [Route("api/products")]
     public class ProductController : ControllerBase
     {
-        private readonly ProductService _productService;
-        private readonly ILogger<ProductController> _logger;
+        private readonly ProductService _service;
 
-        public ProductController(ILogger<ProductController> logger, InventoryDbContext _databaseService)
+        public ProductController(ProductService service)
         {
-            _logger = logger;
-            _productService = new ProductService(_databaseService);
+            _service = service;
         }
 
         [HttpGet]
         public ActionResult<Result<IEnumerable<Product>>> GetProducts()
         {
-            return Ok(new Result<IEnumerable<Product>>(_productService.GetProducts()));
+            return Ok(new Result<IEnumerable<Product>>(_service.GetProducts()));
         }
 
         [HttpGet("{id}")]
         public ActionResult<Result<Product?>> GetProductById(string id)
         {
-            return Ok(new Result<Product?>(_productService.GetProductById(id)));
+            return Ok(new Result<Product?>(_service.GetProductById(id)));
         }
 
         [HttpPost]
         public ActionResult<Result<Product?>> CreateProduct([FromBody] ProductCreated payload)
         {
-            var product = _productService.AddProduct(payload).Result;
-            return Created($"{Request.GetDisplayUrl()}/{product.ID}", new Result<Product?>(product));
+            var product = _service.AddProduct(payload).Result;
+            return Created($"{Request.GetDisplayUrl()}/{product.Id}", new Result<Product?>(product));
         }
 
         [HttpPut]
@@ -44,7 +41,7 @@ namespace server.Controllers
         )
         {
             return Ok(
-                new Result<IEnumerable<Product>>(_productService.UpdateProducts(products).Result)
+                new Result<IEnumerable<Product>>(_service.UpdateProducts(products).Result)
             );
         }
 
@@ -54,13 +51,13 @@ namespace server.Controllers
             [FromBody] ProductUpdated product
         )
         {
-            return Ok(new Result<Product?>(_productService.UpdateProductById(id, product).Result));
+            return Ok(new Result<Product?>(_service.UpdateProductById(id, product).Result));
         }
 
         [HttpDelete("{id}")]
         public ActionResult<Result<bool>> DeleteProductById(string id)
         {
-            return Ok(new Result<bool>(_productService.DeleteProductAsync(id).Result));
+            return Ok(new Result<bool>(_service.DeleteProductAsync(id).Result));
         }
     }
 }

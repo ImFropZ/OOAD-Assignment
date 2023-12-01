@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
 using server.Services;
-using server.Data;
 using Microsoft.AspNetCore.Http.Extensions;
 
 namespace server.Controllers
@@ -10,30 +9,30 @@ namespace server.Controllers
     [Route("api/suppliers")]
     public class SupplierController : Controller
     {
-        private readonly SupplierService _supplierService;
+        private readonly SupplierService _service;
 
-        public SupplierController(InventoryDbContext _databaseService)
+        public SupplierController(SupplierService service)
         {
-            _supplierService = new SupplierService(_databaseService);
+            _service = service;
         }
 
         [HttpGet]
         public ActionResult<Result<IEnumerable<Supplier>>> GetSuppliers()
         {
-            return Ok(new Result<List<Supplier>>(_supplierService.GetSuppliers()));
+            return Ok(new Result<List<Supplier>>(_service.GetSuppliers()));
         }
 
         [HttpGet("{id}")]
         public ActionResult<Result<Supplier?>> GetSupplierById(string id)
         {
-            return Ok(new Result<Supplier?>(_supplierService.GetSupplier(id)));
+            return Ok(new Result<Supplier?>(_service.GetSupplier(id)));
         }
 
         [HttpPost]
         public ActionResult<Result<Supplier?>> CreateSupplier(SupplierCreated payload)
         {
-            var supplier = _supplierService.AddSupplier(payload).Result;
-            return Created($"{Request.GetDisplayUrl()}/{supplier.ID}", new Result<Supplier?>(supplier));
+            var supplier = _service.AddSupplier(payload).Result;
+            return Created($"{Request.GetDisplayUrl()}/{supplier.Id}", new Result<Supplier?>(supplier));
         }
 
         [HttpPut]
@@ -42,20 +41,20 @@ namespace server.Controllers
         )
         {
             return Ok(
-                new Result<List<Supplier>>(_supplierService.UpdateSuppliers(suppliers).Result)
+                new Result<List<Supplier>>(_service.UpdateSuppliers(suppliers).Result)
             );
         }
 
         [HttpPatch("{id}")]
         public ActionResult<Result<Supplier?>> UpdateSupplierById(string id, SupplierUpdated payload)
         {
-            return Ok(new Result<Supplier?>(_supplierService.UpdateSupplier(id, payload).Result));
+            return Ok(new Result<Supplier?>(_service.UpdateSupplier(id, payload).Result));
         }
 
         [HttpDelete("{id}")]
         public ActionResult<Result<bool>> DeleteSupplierById(string id)
         {
-            return Ok(new Result<bool>(_supplierService.DeleteSupplier(id).Result));
+            return Ok(new Result<bool>(_service.DeleteSupplier(id).Result));
         }
     }
 }

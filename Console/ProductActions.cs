@@ -1,5 +1,9 @@
+using System.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json;
 using server.Models;
 using Spectre.Console;
+using Table = Spectre.Console.Table;
 
 namespace Console;
 
@@ -18,7 +22,7 @@ public class ProductActions
 
         foreach (var product in products)
         {
-            table.AddRow(product.ID ?? "", product.SupplierID ?? "", product.Name ?? "", product.Price + "",
+            table.AddRow(product.Id ?? "", product.SupplierId ?? "", product.Name ?? "", product.Price + "",
                 product.Quantity + "", product.Categories ?? "");
         }
 
@@ -35,13 +39,23 @@ public class ProductActions
         table.AddColumn("Quantity");
         table.AddColumn("Categories");
 
-        table.AddRow("Generate" + "", product.SupplierID + "", product.Name, product.Price + "",
+        table.AddRow("Generate" + "", product.SupplierId + "", product.Name, product.Price + "",
             product.Quantity + "", product.Categories);
 
         AnsiConsole.Write(table);
     }
 
-    public void Add()
+    public void View()
+    {
+        ProductTableGrid(Program.Products);
+
+        AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+        System.Console.ReadKey();
+        AnsiConsole.Clear();
+        Program.ProductView();
+    }
+
+    public async Task Add()
     {
         AnsiConsole.MarkupLine("[blue]Add product[/]");
 
@@ -50,56 +64,75 @@ public class ProductActions
         var price = AnsiConsole.Ask<decimal>("Products Price?");
         var categories = AnsiConsole.Ask<string>("Products Categories?[grey]Separate with comma (,)[/]");
 
+        var supplierNames = Program.Suppliers.Select(x => x.Name ?? "").ToArray();
+
+        if (supplierNames.Length == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No supplier found. Please add supplier first.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.ProductView();
+        }
+
         // Select supplier
         var supplierId = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title(
                     "[green]Select supplier[/]\n[grey]Navigate with arrow keys up/down and press enter to select.[/]")
                 .PageSize(10)
-                .AddChoices(new[]
-                {
-                    "Supplier 1", "Supplier 2", "Supplier 3", "Supplier 4", "Supplier 5", "Supplier 6", "Supplier 7",
-                    "Supplier 8", "Supplier 9", "Supplier 10"
-                }));
+                .AddChoices(supplierNames)
+        );
+
+        // Convert from name to id
+        supplierId = Program.Suppliers.FirstOrDefault(x => x.Name == supplierId)?.Id ?? "";
 
         AnsiConsole.MarkupLine("[green]Preview the product details[/]");
 
-        ProductDetailsView(new Product()
+        var newProduct = new Product()
         {
             Name = name,
             Quantity = quantity,
             Price = price,
             Categories = categories,
-            SupplierID = supplierId
-        });
+            SupplierId = supplierId
+        };
+
+        ProductDetailsView(newProduct);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
 
         System.Console.ReadKey();
+
+        using var client = Program.CreateHttpClient();
+        {
+            var response = await client.PostAsync("https://localhost:7177/api/products",
+                new StringContent(JsonConvert.SerializeObject(newProduct), Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Log the error message
+                System.Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+                
+                AnsiConsole.MarkupLine("[red]Failed to add product.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.ProductView();
+            }
+        }
+
+        await Program.FetchData();
 
         AnsiConsole.Clear();
 
         Program.ProductView();
     }
 
-    public void Remove()
+    public async Task Remove()
     {
         AnsiConsole.MarkupLine("[blue]Remove product[/]");
-        // TODO:
-        var products = new List<Product>();
-
-        for (var i = 0; i < 10; i++)
-        {
-            products.Add(new Product()
-            {
-                ID = i + "",
-                SupplierID = "SUP-" + i,
-                Name = $"Product - {i}", Price = 50,
-                Categories = $"Categories - {i}", Quantity = 50
-            });
-        }
-
-        ProductTableGrid(products);
+        ProductTableGrid(Program.Products);
 
         var id = AnsiConsole.Ask<string>("Product Id? [grey]Enter -1 to cancel[/]");
 
@@ -109,45 +142,48 @@ public class ProductActions
             Program.ProductView();
         }
 
+        var product = Program.Products.Find(x => x.Id == id);
+
+        if (product == null)
+        {
+            AnsiConsole.MarkupLine("[red]Product not found.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.ProductView();
+        }
+
         AnsiConsole.MarkupLine("[green]Preview the product details[/]");
 
-        // TODO: Fake products
-        ProductDetailsView(new Product()
-        {
-            ID = id,
-            SupplierID = "Example",
-            Name = "Example",
-            Categories = "Example",
-            Price = 10,
-            Quantity = 20
-        });
+        ProductDetailsView(product);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
 
-        AnsiConsole.Clear();
+        using var client = Program.CreateHttpClient();
+        {
+            var response = await client.DeleteAsync($"https://localhost:7177/api/products/{id}");
 
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("[red]Failed to remove product.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.SupplierView();
+            }
+        }
+
+        await Program.FetchData();
+
+        AnsiConsole.Clear();
         Program.ProductView();
     }
 
-    public void Update()
+    public async Task Update()
     {
         AnsiConsole.MarkupLine("[blue]Update product[/]");
-        // TODO:
-        var products = new List<Product>();
-
-        for (var i = 0; i < 10; i++)
-        {
-            products.Add(new Product()
-            {
-                ID = i + "",
-                SupplierID = "SUP-" + i,
-                Name = $"Product - {i}", Price = 50,
-                Categories = $"Categories - {i}", Quantity = 50
-            });
-        }
-
-        ProductTableGrid(products);
+        ProductTableGrid(Program.Products);
 
         var id = AnsiConsole.Ask<string>("Product Id? [grey]Enter -1 to cancel[/]");
 
@@ -159,16 +195,18 @@ public class ProductActions
 
         AnsiConsole.MarkupLine("[green]Preview the product details[/]");
 
-        // TODO: Fake products
-        ProductDetailsView(new Product()
+        var product = Program.Products.Find(x => x.Id == id);
+
+        if (product == null)
         {
-            ID = id,
-            SupplierID = "Example",
-            Name = "Example",
-            Categories = "Example",
-            Price = 10,
-            Quantity = 20
-        });
+            AnsiConsole.MarkupLine("[red]Product not found.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.ProductView();
+        }
+
+        ProductDetailsView(product);
 
         var name = AnsiConsole.Prompt(
             new TextPrompt<string>("[[Optional]] Product Name?").AllowEmpty());
@@ -179,33 +217,66 @@ public class ProductActions
         var qty = AnsiConsole.Prompt(
             new TextPrompt<int>("[[Optional]] Product Quantity? [grey]Input -1 for not update quantity[/]"));
 
+        var supplierNames = Program.Suppliers.Select(x => x.Name ?? "").ToList();
+
+        if (supplierNames.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No supplier found. Please add supplier first.[/]");
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            System.Console.ReadKey();
+            AnsiConsole.Clear();
+            Program.ProductView();
+        }
+
+        supplierNames.InsertRange(0, new List<string> { "No Update" });
+
         var supplierId = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title(
                     "[green]Select supplier[/]\n[grey]Navigate with arrow keys up/down and press enter to select.[/]")
                 .PageSize(10)
-                .AddChoices(new[]
-                {
-                    "Not Update", "Supplier 1", "Supplier 2", "Supplier 3", "Supplier 4", "Supplier 5", "Supplier 6",
-                    "Supplier 7",
-                    "Supplier 8", "Supplier 9", "Supplier 10"
-                }));
+                .AddChoices(supplierNames)
+        );
+
+        if (supplierId != "No Update")
+        {
+            supplierId = Program.Suppliers.FirstOrDefault(x => x.Name == supplierId)?.Id ?? "";
+        }
 
         AnsiConsole.MarkupLine("[green]Preview updated product details[/]");
 
-        ProductDetailsView(new Product()
+        var updatedProduct = new Product()
         {
-            ID = id,
-            SupplierID = supplierId == "Not Update" ? "Example" : supplierId,
-            Name = name == "" ? "Example" : name,
-            Price = price == -1 ? 10 : price,
-            Quantity = qty == -1 ? 20 : qty,
-            Categories = categories == "" ? "Example" : categories
-        });
+            Id = product.Id,
+            SupplierId = supplierId == "Not Update" ? product.SupplierId : supplierId,
+            Name = name == "" ? product.Name : name,
+            Price = price == -1 ? product.Price : price,
+            Quantity = qty == -1 ? product.Quantity : qty,
+            Categories = categories == "" ? product.Categories : categories
+        };
+
+        ProductDetailsView(updatedProduct);
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
-        
+
+        using (var client = Program.CreateHttpClient())
+        {
+            var response = await client.PutAsync($"https://localhost:7177/api/products/{id}",
+                new StringContent(JsonConvert.SerializeObject(updatedProduct), Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("[red]Failed to update product.[/]");
+                AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+                System.Console.ReadKey();
+                AnsiConsole.Clear();
+                Program.SupplierView();
+            }
+        }
+
+        await Program.FetchData();
+
         AnsiConsole.Clear();
         Program.ProductView();
     }
