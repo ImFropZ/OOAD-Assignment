@@ -7,6 +7,7 @@ namespace server.Models
         [Required, Key] public string? Id { get; set; }
         [Required] public string? Name { get; set; }
         [Required] public string? ContactInformation { get; set; }
+        public List<Product> Products { get; set; }
     }
 
     public class SupplierCreated

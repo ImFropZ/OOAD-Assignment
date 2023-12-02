@@ -10,12 +10,16 @@ public class ProductEntityTypeConfig : IEntityTypeConfiguration<Product>
     {
         builder.ToTable("Product");
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.Name).HasColumnName("name");
         builder.Property(x => x.Categories).HasColumnName("categories");
         builder.Property(x => x.Quantity).HasColumnName("quantity");
         builder.Property(x => x.Price).HasColumnName("price");
         builder.Property(x => x.SupplierId).HasColumnName("supplier_id");
+
+        builder.HasOne(x => x.Supplier)
+            .WithMany(x => x.Products)
+            .HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Cascade);
     }
 }
