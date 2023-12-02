@@ -1,8 +1,7 @@
-using System.Net.Http.Headers;
-using System.Text;
+using Console.Models;
 using Newtonsoft.Json;
-using server.Models;
 using Spectre.Console;
+using System.Text;
 using Table = Spectre.Console.Table;
 
 namespace Console;
@@ -106,14 +105,14 @@ public class ProductActions
 
         using var client = Program.CreateHttpClient();
         {
-            var response = await client.PostAsync("https://localhost:7177/api/products",
+            var response = await client.PostAsync($"{Program.URI}/products",
                 new StringContent(JsonConvert.SerializeObject(newProduct), Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)
             {
                 // Log the error message
                 System.Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-                
+
                 AnsiConsole.MarkupLine("[red]Failed to add product.[/]");
                 AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
                 System.Console.ReadKey();
@@ -162,7 +161,7 @@ public class ProductActions
 
         using var client = Program.CreateHttpClient();
         {
-            var response = await client.DeleteAsync($"https://localhost:7177/api/products/{id}");
+            var response = await client.DeleteAsync($"{Program.URI}/products/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -245,9 +244,8 @@ public class ProductActions
 
         AnsiConsole.MarkupLine("[green]Preview updated product details[/]");
 
-        var updatedProduct = new Product()
+        var updatedProduct = new ProductUpdated()
         {
-            Id = product.Id,
             SupplierId = supplierId == "Not Update" ? product.SupplierId : supplierId,
             Name = name == "" ? product.Name : name,
             Price = price == -1 ? product.Price : price,
@@ -255,14 +253,22 @@ public class ProductActions
             Categories = categories == "" ? product.Categories : categories
         };
 
-        ProductDetailsView(updatedProduct);
+        ProductDetailsView(new()
+        {
+            Id = id,
+            SupplierId = updatedProduct.SupplierId,
+            Name = updatedProduct.Name,
+            Price = updatedProduct.Price ?? 0,
+            Quantity = updatedProduct.Quantity ?? 0,
+            Categories = updatedProduct.Categories
+        });
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
 
         using (var client = Program.CreateHttpClient())
         {
-            var response = await client.PutAsync($"https://localhost:7177/api/products/{id}",
+            var response = await client.PatchAsync($"{Program.URI}/products/{id}",
                 new StringContent(JsonConvert.SerializeObject(updatedProduct), Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)

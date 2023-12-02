@@ -1,11 +1,13 @@
-﻿using server.Models;
-using Spectre.Console;
+﻿using Console.Models;
 using Newtonsoft.Json;
+using Spectre.Console;
 
 namespace Console;
 
 public static class Program
 {
+    public static string URI = "https://localhost:44358/api";
+
     public static List<Product> Products;
     public static List<Supplier> Suppliers;
 
@@ -61,8 +63,8 @@ public static class Program
 
     public static async Task FetchData()
     {
-        var products = await GetProducts("https://localhost:7177/api/products");
-        var suppliers = await GetSuppliers("https://localhost:7177/api/suppliers");
+        var products = await GetProducts($"{URI}/products");
+        var suppliers = await GetSuppliers($"{URI}/suppliers");
 
         Products = products;
         Suppliers = suppliers;
@@ -85,7 +87,7 @@ public static class Program
                     "[green]What do you want to do?[/]\n[grey]Navigate with arrow keys up/down and press enter to select.[/]")
                 .AddChoices(new[]
                 {
-                    "Product", "Vendor", "[red]Exit[/]"
+                    "Product", "Supplier", "[red]Exit[/]"
                 }));
 
         switch (mode)
@@ -93,7 +95,7 @@ public static class Program
             case ("Product"):
                 ProductView();
                 break;
-            case ("Vendor"):
+            case ("Supplier"):
                 SupplierView();
                 break;
             case ("Exit"):

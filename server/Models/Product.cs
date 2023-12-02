@@ -14,6 +14,16 @@ namespace server.Models
         public Supplier? Supplier { get; set; }
     }
 
+    public class ProductResponse
+    {
+        public string? Id { get; set; }
+        public string? SupplierId { get; set; }
+        public string? Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public string? Categories { get; set; }
+    }
+
     public class ProductCreated
     {
         [Required] public string? SupplierId { get; set; }

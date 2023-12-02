@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using server.Models;
 using server.Services;
-using Microsoft.AspNetCore.Http.Extensions;
 
 namespace server.Controllers
 {
@@ -17,41 +17,108 @@ namespace server.Controllers
         }
 
         [HttpGet]
-        public ActionResult<Result<IEnumerable<Product>>> GetProducts()
+        public ActionResult<Result<IEnumerable<ProductResponse>>> GetProducts()
         {
-            return Ok(new Result<IEnumerable<Product>>(_service.GetProducts()));
+            var products = _service.GetProducts();
+            var response = new List<ProductResponse>();
+
+            foreach (var product in products)
+            {
+                response.Add(new ProductResponse()
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Quantity = product.Quantity,
+                    Price = product.Price,
+                    Categories = product.Categories,
+                    SupplierId = product.SupplierId,
+
+                });
+            }
+            return Ok(new Result<IEnumerable<ProductResponse>>(response));
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Result<Product?>> GetProductById(string id)
+        public ActionResult<Result<ProductResponse?>> GetProductById(string id)
         {
-            return Ok(new Result<Product?>(_service.GetProductById(id)));
+            var product = _service.GetProductById(id);
+
+            if (product == null)
+                return NotFound(new Result<ProductResponse?>(null));
+
+            var response = new ProductResponse()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Quantity = product.Quantity,
+                Price = product.Price,
+                Categories = product.Categories,
+                SupplierId = product.SupplierId,
+            };
+
+            return Ok(new Result<ProductResponse?>(response));
         }
 
         [HttpPost]
-        public ActionResult<Result<Product?>> CreateProduct([FromBody] ProductCreated payload)
+        public ActionResult<Result<ProductResponse?>> CreateProduct([FromBody] ProductCreated payload)
         {
             var product = _service.AddProduct(payload).Result;
-            return Created($"{Request.GetDisplayUrl()}/{product.Id}", new Result<Product?>(product));
+            return Created($"{Request.GetDisplayUrl()}/{product.Id}", new Result<ProductResponse?>(new()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Quantity = product.Quantity,
+                Price = product.Price,
+                Categories = product.Categories,
+                SupplierId = product.SupplierId,
+            }));
         }
 
         [HttpPut]
-        public ActionResult<Result<IEnumerable<Product>>> UpdateProducts(
+        public ActionResult<Result<IEnumerable<ProductResponse>>> UpdateProducts(
             [FromBody] List<ProductUpdated> products
         )
         {
+            var updatedProducts = _service.UpdateProducts(products).Result;
+            var response = new List<ProductResponse>();
+
+            foreach (var product in updatedProducts)
+            {
+                response.Add(new ProductResponse()
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Quantity = product.Quantity,
+                    Price = product.Price,
+                    Categories = product.Categories,
+                    SupplierId = product.SupplierId,
+                });
+            }
+
             return Ok(
-                new Result<IEnumerable<Product>>(_service.UpdateProducts(products).Result)
+                new Result<IEnumerable<ProductResponse>>(response)
             );
         }
 
         [HttpPatch("{id}")]
-        public ActionResult<Result<Product?>> UpdateProductById(
+        public ActionResult<Result<ProductResponse?>> UpdateProductById(
             string id,
             [FromBody] ProductUpdated product
         )
         {
-            return Ok(new Result<Product?>(_service.UpdateProductById(id, product).Result));
+            var updatedProduct = _service.UpdateProductById(id, product).Result;
+            if (updatedProduct == null)
+                return NotFound(new Result<ProductResponse?>(null));
+
+            return Ok(new Result<ProductResponse?>(new()
+            {
+                Id = updatedProduct.Id,
+                Name = updatedProduct.Name,
+                Quantity = updatedProduct.Quantity,
+                Price = updatedProduct.Price,
+                Categories = updatedProduct.Categories,
+                SupplierId = product.SupplierId
+            }));
         }
 
         [HttpDelete("{id}")]

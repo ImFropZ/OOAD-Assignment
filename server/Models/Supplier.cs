@@ -10,6 +10,13 @@ namespace server.Models
         public List<Product> Products { get; set; }
     }
 
+    public class SupplierResponse
+    {
+        [Required, Key] public string? Id { get; set; }
+        [Required] public string? Name { get; set; }
+        [Required] public string? ContactInformation { get; set; }
+    }
+
     public class SupplierCreated
     {
         [Required] public string? Name { get; set; }

@@ -1,7 +1,7 @@
-using System.Text;
+using Console.Models;
 using Newtonsoft.Json;
-using server.Models;
 using Spectre.Console;
+using System.Text;
 
 namespace Console;
 
@@ -33,15 +33,15 @@ public class SupplierActions
 
         AnsiConsole.Write(table);
     }
-    
+
     public void View()
     {
         SupplierTableGrid(Program.Suppliers);
-        
+
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
         AnsiConsole.Clear();
-        Program.ProductView();
+        Program.SupplierView();
     }
 
     public async Task Add()
@@ -66,7 +66,7 @@ public class SupplierActions
 
         using var client = Program.CreateHttpClient();
         {
-            var response = await client.PostAsync("https://localhost:7177/api/Suppliers",
+            var response = await client.PostAsync($"{Program.URI}/Suppliers",
                 new StringContent(JsonConvert.SerializeObject(newSupplier), Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)
@@ -118,7 +118,7 @@ public class SupplierActions
 
         using var client = Program.CreateHttpClient();
         {
-            var response = await client.DeleteAsync($"https://localhost:7177/api/Suppliers/{id}");
+            var response = await client.DeleteAsync($"{Program.URI}/Suppliers/{id}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -171,21 +171,25 @@ public class SupplierActions
 
         AnsiConsole.MarkupLine("[green]Preview update supplier details[/]");
 
-        var updatedSupplier = new Supplier()
+        var updatedSupplier = new SupplierUpdated()
         {
-            Id = id,
             Name = name == "" ? found.Name : name,
             ContactInformation = contactInformation == "" ? found.ContactInformation : contactInformation
         };
 
-        SupplierDetailsView(updatedSupplier);
+        SupplierDetailsView(new()
+        {
+            Id = found.Id,
+            Name = updatedSupplier.Name,
+            ContactInformation = updatedSupplier.ContactInformation
+        });
 
         AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
         System.Console.ReadKey();
-        
+
         using var client = Program.CreateHttpClient();
         {
-            var response = await client.PutAsync($"https://localhost:7177/api/Suppliers/{id}",
+            var response = await client.PatchAsync($"{Program.URI}/Suppliers/{id}",
                 new StringContent(JsonConvert.SerializeObject(updatedSupplier), Encoding.UTF8, "application/json"));
 
             if (!response.IsSuccessStatusCode)
@@ -197,9 +201,9 @@ public class SupplierActions
                 Program.SupplierView();
             }
         }
-        
+
         await Program.FetchData();
-        
+
         AnsiConsole.Clear();
         Program.SupplierView();
     }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using server.Exceptions;
 using server.Models;
 
@@ -32,10 +33,10 @@ namespace server.Services
         public async Task<Product> AddProduct(ProductCreated product)
         {
             // Check if supplier exists
-            var supplier = _context
-                               .Suppliers?
-                               .FirstOrDefault(s => s.Id == product.SupplierId) ??
-                           throw new BadRequestException("Supplier not found");
+            var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.Id == product.SupplierId);
+
+            if (supplier == null)
+                throw new NotFoundException($"Supplier with ID {product.SupplierId} not found");
 
             var newProduct = new Product()
             {
@@ -44,11 +45,17 @@ namespace server.Services
                 Name = product.Name,
                 Quantity = product.Quantity,
                 Price = product.Price,
-                Categories = product.Categories
+                Categories = product.Categories,
+                Supplier = supplier
             };
 
             _context.Products.Add(newProduct);
-            _context.SaveChanges();
+            _context.SaveChanges(); // Use asynchronous SaveChanges
+
+            // Delete field supplier's products
+            if (newProduct.Supplier != null)
+                newProduct.Supplier.Products = null;
+
             return newProduct;
         }
 
@@ -65,7 +72,8 @@ namespace server.Services
                     if (updatedProduct != null)
                         updatedProducts.Add(updatedProduct);
 
-                }catch (Exception)
+                }
+                catch (Exception)
                 {
                 }
             }
@@ -85,7 +93,8 @@ namespace server.Services
 
             var updatedProduct = (_context.Products?.FirstOrDefault(p => p.Id == id)) ?? throw new NotFoundException("Product not found");
 
-            if (product.SupplierId != null) {
+            if (product.SupplierId != null)
+            {
                 // Check if supplier exists
                 var supplier = _context
                     .Suppliers?
