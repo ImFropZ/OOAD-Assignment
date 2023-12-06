@@ -224,7 +224,10 @@ namespace WinForm
                 txtPPrice2.Text = gridProducts.Rows[e.RowIndex].Cells[3].Value.ToString();
                 txtPQty2.Text = gridProducts.Rows[e.RowIndex].Cells[4].Value.ToString();
                 txtPCat2.Text = gridProducts.Rows[e.RowIndex].Cells[5].Value.ToString();
-                cboPSupplier2.SelectedIndex = cboPSupplier2.FindStringExact(gridProducts.Rows[e.RowIndex].Cells[1].Value.ToString());
+
+                string supplierName = Program.Suppliers.Find(s => s.Id == gridProducts.Rows[e.RowIndex].Cells[1].Value.ToString())?.Name ?? "";
+
+                cboPSupplier2.SelectedIndex = cboPSupplier2.FindStringExact(supplierName);
 
                 EnableModificationFields();
             }

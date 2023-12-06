@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "server\Server.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "Console\Console.csproj", "{F16623E8-026C-4937-A322-1B08B17EE5D5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinForm", "SmallInventory\WinForm.csproj", "{3176D4A8-0173-484A-9F12-34064E2B81BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinForm", "WinForm\WinForm.csproj", "{57955131-86C3-4C98-8FE5-6912245D0F34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{F16623E8-026C-4937-A322-1B08B17EE5D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F16623E8-026C-4937-A322-1B08B17EE5D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F16623E8-026C-4937-A322-1B08B17EE5D5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3176D4A8-0173-484A-9F12-34064E2B81BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3176D4A8-0173-484A-9F12-34064E2B81BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3176D4A8-0173-484A-9F12-34064E2B81BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3176D4A8-0173-484A-9F12-34064E2B81BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57955131-86C3-4C98-8FE5-6912245D0F34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57955131-86C3-4C98-8FE5-6912245D0F34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57955131-86C3-4C98-8FE5-6912245D0F34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57955131-86C3-4C98-8FE5-6912245D0F34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -384,7 +384,7 @@
             btnVendor.Name = "btnVendor";
             btnVendor.Size = new Size(122, 23);
             btnVendor.TabIndex = 1;
-            btnVendor.Text = "Vendor";
+            btnVendor.Text = "Supplier";
             btnVendor.UseVisualStyleBackColor = true;
             btnVendor.Click += BtnSupplier_Click;
             // 

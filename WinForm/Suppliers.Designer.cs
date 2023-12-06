@@ -58,9 +58,9 @@
             label10.AutoSize = true;
             label10.Location = new Point(431, 403);
             label10.Name = "label10";
-            label10.Size = new Size(88, 15);
+            label10.Size = new Size(94, 15);
             label10.TabIndex = 7;
-            label10.Text = "Change Vendor";
+            label10.Text = "Change Supplier";
             // 
             // btnProduct
             // 
@@ -78,25 +78,25 @@
             label11.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
             label11.Location = new Point(47, 12);
             label11.Name = "label11";
-            label11.Size = new Size(95, 21);
+            label11.Size = new Size(104, 21);
             label11.TabIndex = 8;
-            label11.Text = "Vendor List";
+            label11.Text = "Supplier List";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(47, 403);
             label2.Name = "label2";
-            label2.Size = new Size(69, 15);
+            label2.Size = new Size(75, 15);
             label2.TabIndex = 9;
-            label2.Text = "Add Vendor";
+            label2.Text = "Add Supplier";
             // 
-            // gridVendors
+            // gridSuppliers
             // 
             gridSuppliers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             gridSuppliers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             gridSuppliers.Location = new Point(30, 41);
-            gridSuppliers.Name = "gridVendors";
+            gridSuppliers.Name = "gridSuppliers";
             gridSuppliers.RowHeadersWidth = 51;
             gridSuppliers.RowTemplate.Height = 25;
             gridSuppliers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -171,9 +171,9 @@
             label4.AutoSize = true;
             label4.Location = new Point(17, 14);
             label4.Name = "label4";
-            label4.Size = new Size(79, 15);
+            label4.Size = new Size(85, 15);
             label4.TabIndex = 3;
-            label4.Text = "Vendor Name";
+            label4.Text = "Supplier Name";
             // 
             // txtVName2
             // 
@@ -230,9 +230,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(17, 14);
             label1.Name = "label1";
-            label1.Size = new Size(79, 15);
+            label1.Size = new Size(85, 15);
             label1.TabIndex = 3;
-            label1.Text = "Vendor Name";
+            label1.Text = "Supplier Name";
             // 
             // txtVInfo
             // 
@@ -262,7 +262,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "Suppliers";
-            Text = "Vendors";
+            Text = "Suppliers";
             ((System.ComponentModel.ISupportInitialize)gridSuppliers).EndInit();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
